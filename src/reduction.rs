@@ -1,4 +1,5 @@
 const SIZE: u8 = 8;
+const SALT_VALUE: u32 = 248715;
 
 const SIGMA_SIZE: u8 = 36;
 const SIGMA: [char; 36] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -17,7 +18,7 @@ pub fn reduce_xor(hash: [u8; 32], nounce: u32) -> String {
     let mut reduce: [u8; 32] = [0; 32];
 
     for index in 0..32 {
-        reduce[index] = hash[index] ^ nounce as u8;
+        reduce[index] = hash[index] ^ (nounce + SALT_VALUE) as u8;
     }
 
     let password = to_password(&reduce);
@@ -28,9 +29,9 @@ pub fn reduce_mod(hash: [u8; 32], nounce: u32) -> String {
     let mut reduce: [u8; 32] = [0; 32];
 
     for index in 0..32 {
-        reduce[index] = hash[index] % nounce as u8;
+        reduce[index] = hash[index] % (nounce + SALT_VALUE) as u8;
     }
 
-    //let password = to_password(&reduce);
-    String::from("test")
+    let password = to_password(&reduce);
+    password
 }
