@@ -3,8 +3,8 @@ use crate::reduction::reduce_truncate_xor;
 
 const NONCE: u32 = 248820715;
 
-const NB_PASSWORD: u32 = 100;
-const NB_NODE: u32 = 100;
+const NB_PASSWORD: u32 = 36;
+const NB_NODE: u32 = 4;
 
 
 #[derive(Debug)]
@@ -25,7 +25,7 @@ fn generate_table(rainbow_table: &mut Vec<Node>, start: &str, nb_node: u32, nb_p
 
     for i in 0..nb_password {
         for j in 0..nb_node {
-            reduce = reduce_truncate_xor(hash.as_slice().try_into().unwrap(), i+NONCE);
+            reduce = reduce_truncate_xor(hash.as_slice().try_into().unwrap(), j+NONCE);
             hash = sha3(&reduce.clone());
             
             if j == 0 {
@@ -48,7 +48,7 @@ fn print_table(rainbow_table: &Vec<Node>) {
     }
 }
 
-pub fn rainbow_table(password : &str) {
+pub fn rainbowtable(password : &str) {
 
     let mut rainbow_table: Vec<Node> = Vec::new();
 

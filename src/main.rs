@@ -1,5 +1,5 @@
-use projet_crypto::sha3::{sha3};
-use projet_crypto::rainbow_table::rainbow_table;
+use rainbow_table::sha3::{sha3};
+use rainbow_table::rainbowtable::rainbowtable;
 fn main() {
-    rainbow_table("abc");
+    rainbowtable("abc");
 }

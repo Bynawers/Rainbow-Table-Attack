@@ -1,4 +1,4 @@
-const SIZE: u8 = 6;
+const SIZE: u8 = 1;
 
 const SIGMA_SIZE: u8 = 36;
 const SIGMA: [char; 36] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
