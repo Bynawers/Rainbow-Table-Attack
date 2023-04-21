@@ -1,13 +1,8 @@
-const SIZE: u8 = 8;
+const SIZE: u8 = 3;
 
 const SIGMA_SIZE: u8 = 36;
 const SIGMA: [char; 36] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
-
-// a-z0-9 => 8^35 = 2 607 586 401 000 000 possibilitées
-// 255 fonctions de réduction différentes (u8)
-// 0 collisions en 500 000 répétitions sur 0,01% de 8^35
-
 
 pub fn reduce_xor(hash: [u8; 32], nonce: u32) -> String {
     let mut reduce: [u8; 32] = [0; 32];
