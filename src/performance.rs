@@ -2,8 +2,7 @@ use sha3::{Sha3_256, Digest};
 use std::time::{Instant, Duration};
 
 use crate::reduction;
-
-const NONCE: u32 = 248820715;
+use crate::constants;
 
 #[derive(Debug)] 
 pub struct Performance {
@@ -40,16 +39,16 @@ pub fn perf_reduction(message: &str, nb_node: u32, type_reduction: Reduction) ->
     for i in 0..nb_node {
         match type_reduction {
             Reduction::Xor => {
-                reduce = reduction::reduce_xor(hash.as_slice().try_into().unwrap(), i+NONCE);
+                reduce = reduction::reduce_xor(hash.as_slice().try_into().unwrap(), i+constants::NONCE);
             },
             Reduction::Modulo => {
-                reduce = reduction::reduce_mod(hash.as_slice().try_into().unwrap(), i+NONCE);
+                reduce = reduction::reduce_mod(hash.as_slice().try_into().unwrap(), i+constants::NONCE);
             },
             Reduction::Truncate => {
-                reduce = reduction::reduce_truncate(hash.as_slice().try_into().unwrap(), i+NONCE);
+                reduce = reduction::reduce_truncate(hash.as_slice().try_into().unwrap(), i+constants::NONCE);
             },
             Reduction::TruncateXor => {
-                reduce = reduction::reduce_truncate_xor(hash.as_slice().try_into().unwrap(), i+NONCE);
+                reduce = reduction::reduce_truncate_xor(hash.as_slice().try_into().unwrap(), i+constants::NONCE);
             },
             _ => {
                 return Err(Error::UnknowTypeError);
