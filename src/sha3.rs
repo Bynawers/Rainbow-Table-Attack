@@ -102,6 +102,8 @@ fn round(mut a : [[u64;5];5], v_rc : u64) -> [[u64;5];5] {
 }
 
 
+
+
 fn extraction(big_tab:[[u64;5];5]) -> [u8;32] {
     let mut hash_octet : [u8;32] = [0;32];
     let mut c : String = String::new();
