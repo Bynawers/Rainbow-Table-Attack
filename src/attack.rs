@@ -1,4 +1,4 @@
-use sha3::{Sha3_256, Digest};
+use crate::sha3;
 
 use crate::reduction;
 
@@ -15,7 +15,7 @@ struct Node {
 }
 
 pub fn execution() {
-    let message = "Cryptographie";
+    let message = "abc";
     
 
     let mut rainbow_table: Vec<Node> = Vec::new();
@@ -26,7 +26,7 @@ pub fn execution() {
 }
 
 fn generate_table(rainbow_table: &mut Vec<Node>, start: &str, nb_node: u32, nb_password: u32) {
-    let mut hash = Sha3_256::digest(start.as_bytes());
+    let mut hash = sha3::sha3(start);
     let mut reduce;
     let mut node = Node { 
         start: String::from(""), 
@@ -34,9 +34,10 @@ fn generate_table(rainbow_table: &mut Vec<Node>, start: &str, nb_node: u32, nb_p
     };
 
     for i in 0..nb_password {
+        println!("tour : {}",i);
         for j in 0..nb_node {
             reduce = reduction::reduce_xor(hash.as_slice().try_into().unwrap(), i+NONCE);
-            hash = Sha3_256::digest(reduce.clone());
+            hash = sha3::sha3(&reduce.clone());
             
             if j == 0 {
                 node.start = reduce.clone();
