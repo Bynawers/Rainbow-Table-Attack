@@ -2,7 +2,7 @@ use rainbow_table::attack;
 use rainbow_table::performance;
 
 fn main() {
-    let message = "Cryptographie";
+    let flag = "psg";
 
     /*
     let performance = performance::perf_reduction(message, 500000, performance::Reduction::TruncateXor);
@@ -12,5 +12,5 @@ fn main() {
         Err(e) => { println!("> Error : {:?}", e) }
     }*/
 
-    attack::execution();
+    attack::execution(flag);
 }

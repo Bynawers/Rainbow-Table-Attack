@@ -10,8 +10,8 @@ pub struct Node {
     pub end: String,
 }
 
-pub fn generate_table(rainbow_table: &mut Vec<Node>, message: &str, nb_node: u32, nb_password: u32) {
-    let mut hash = Sha3_256::digest(message.as_bytes());
+pub fn generate_table(rainbow_table: &mut Vec<Node>, nb_node: u32, nb_password: u32) {
+    let mut hash = Sha3_256::digest(constants::GENERATOR_RAINBOW_TABLE.as_bytes());
     let mut reduce;
     let mut node = Node { 
         start: String::from(""), 
@@ -20,7 +20,7 @@ pub fn generate_table(rainbow_table: &mut Vec<Node>, message: &str, nb_node: u32
 
     for i in 0..nb_password {
         for j in 0..nb_node {
-            reduce = reduction::reduce_truncate(hash.as_slice().try_into().unwrap(), i+constants::NONCE);
+            reduce = reduction::reduce_truncate_xor(hash.as_slice().try_into().unwrap(), j+constants::NONCE);
             hash = Sha3_256::digest(reduce.clone());
             
             if j == 0 {
@@ -30,5 +30,13 @@ pub fn generate_table(rainbow_table: &mut Vec<Node>, message: &str, nb_node: u32
             }
         }
         rainbow_table.push(node.clone());
+    }
+    print_table(rainbow_table);
+}
+
+fn print_table(rainbow_table: &Vec<Node>) {
+
+    for element in rainbow_table {
+        println!("{:?} \n", element);
     }
 }

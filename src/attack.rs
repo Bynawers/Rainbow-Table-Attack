@@ -4,13 +4,11 @@ use crate::reduction;
 use crate::rainbow_table;
 use crate::constants;
 
-pub fn execution() {
-    let message = "Cryptographie";
-    let flag = "psg";
-
+pub fn execution(flag: &str) {
+    
     let mut rainbow_table: Vec<rainbow_table::Node> = Vec::new();
 
-    rainbow_table::generate_table(&mut rainbow_table, message, constants::NB_NODE, constants::NB_PASSWORD);
+    rainbow_table::generate_table(&mut rainbow_table, constants::NB_NODE, constants::NB_PASSWORD);
     //print_table(&rainbow_table);
     println!("\nAttack réussi ? {}", search_password(&mut rainbow_table, flag, constants::NB_NODE, constants::NB_PASSWORD));
 }
@@ -60,11 +58,4 @@ fn compare_end(rainbow_table: &mut Vec<rainbow_table::Node>, value: String, nb_p
     }
 
     return false;
-}
-
-fn print_table(rainbow_table: &Vec<rainbow_table::Node>) {
-
-    for element in rainbow_table {
-        println!("{:?} \n", element);
-    }
 }
