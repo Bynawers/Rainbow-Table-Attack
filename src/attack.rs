@@ -1,21 +1,23 @@
 use crate::sha3;
 
+use crate::test;
+
 use crate::reduction;
 
 const NONCE: u32 = 248820715;
 
-const NB_PASSWORD: u32 = 100;
-const NB_NODE: u32 = 100;
+const NB_PASSWORD: u32 = 36;
+const NB_NODE: u32 = 4;
 
 #[derive(Debug)]
 #[derive(Clone)]
-struct Node {
-    start: String,
-    end: String,
+pub struct Node {
+    pub start: String,
+    pub end: String,
 }
 
 pub fn execution() {
-    let message = "abc";
+    let message = "a";
     
 
     let mut rainbow_table: Vec<Node> = Vec::new();
@@ -23,6 +25,7 @@ pub fn execution() {
     generate_table(&mut rainbow_table, message, NB_NODE, NB_PASSWORD);
 
     print_table(&rainbow_table);
+    test::test(&rainbow_table);
 }
 
 fn generate_table(rainbow_table: &mut Vec<Node>, start: &str, nb_node: u32, nb_password: u32) {
