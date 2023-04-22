@@ -128,7 +128,7 @@ fn extraction(big_tab:[[u64;5];5]) -> [u8;32] {
         }
     }
     
-    println!("{:?}",c);
+    //println!("{:?}",c);
     //println!("{:?}",hash_octet);
     //println!("{:b}",value.reverse_bits());
     //for elt in big_tab{}

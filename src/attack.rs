@@ -3,16 +3,18 @@ use sha3::{Sha3_256, Digest};
 use crate::reduction;
 use crate::rainbow_table;
 use crate::constants;
+use crate::test;
 
 pub fn execution() {
-    let message = "Cryptographie";
+    let message = "o";
     let flag = "psg";
 
     let mut rainbow_table: Vec<rainbow_table::Node> = Vec::new();
 
     rainbow_table::generate_table(&mut rainbow_table, message, constants::NB_NODE, constants::NB_PASSWORD);
-    //print_table(&rainbow_table);
-    println!("\nAttack réussi ? {}", search_password(&mut rainbow_table, flag, constants::NB_NODE, constants::NB_PASSWORD));
+    print_table(&rainbow_table);
+    test::test(&rainbow_table);
+    //println!("\nAttack réussi ? {}", search_password(&mut rainbow_table, flag, constants::NB_NODE, constants::NB_PASSWORD));
 }
 
 
