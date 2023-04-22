@@ -1,4 +1,4 @@
-use sha3::{Sha3_256, Digest};
+use crate::sha3;
 
 use crate::reduction;
 use crate::rainbow_table;
@@ -12,17 +12,28 @@ pub fn execution() {
     let mut rainbow_table: Vec<rainbow_table::Node> = Vec::new();
 
     rainbow_table::generate_table(&mut rainbow_table, message, constants::NB_NODE, constants::NB_PASSWORD);
-    print_table(&rainbow_table);
+    //println!("start et end de la rainbow table :");
+    //for elt in &rainbow_table {
+    //    print!("start : {} and end {}",elt.start,elt.end);
+    //    println!("");
+    //    print!("start est cencé devenir : ");
+    //    affiche_hash(sha3::sha3(&elt.start));
+    //    println!("");
+    //}
     test::test(&rainbow_table);
     //println!("\nAttack réussi ? {}", search_password(&mut rainbow_table, flag, constants::NB_NODE, constants::NB_PASSWORD));
 }
 
 
-
+pub fn affiche_hash(tab: [u8;32]) {
+    for elt in tab {
+        print!("{:0x}",elt);
+    }
+}
 
 fn search_password(rainbow_table: &mut Vec<rainbow_table::Node>, flag: &str, nb_node: u32, nb_password: u32) -> bool {
 
-    let hash_flag = Sha3_256::digest(flag.as_bytes());
+    let hash_flag = sha3::sha3(flag);
     let mut reduce = reduction::reduce_xor(hash_flag.as_slice().try_into().unwrap(), constants::NONCE);
 
     println!("\n> nb_node = {} :", nb_node);
@@ -34,7 +45,7 @@ fn search_password(rainbow_table: &mut Vec<rainbow_table::Node>, flag: &str, nb_
 
         for j in nb_node-(i+1)..nb_node {
             
-            let mut tmp = Sha3_256::digest(reduce.clone());
+            let mut tmp = sha3::sha3(&reduce);
             reduce = reduction::reduce_xor(tmp.as_slice().try_into().unwrap(), j+constants::NONCE);
 
             if j+1 == nb_node {
