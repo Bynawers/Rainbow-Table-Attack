@@ -1,7 +1,12 @@
+use crate::constants::SIZE;
 use crate::sha3;
+use random_string::generate;
 
 use crate::reduction;
 use crate::constants;
+use crate::attack;
+
+pub const CHARSET: &str = "abcdefghijklmnopqrstuvwxyz0123456789";
 
 #[derive(Debug)]
 #[derive(Clone)]
@@ -13,37 +18,38 @@ pub struct Node {
 pub fn generate_table(rainbow_table: &mut Vec<Node>, message: &str, nb_node: u32, nb_password: u32) {
     println!("rainbow tables pdt leur création :");
     let mut hash = sha3::sha3(message);
-    let mut reduce;
+    let mut reduce = Box::leak(generate(SIZE as usize,CHARSET).into_boxed_str());
     let mut starting_items = Vec::<String>::new();
     let mut node = Node { 
         start: String::from(""), 
         end: String::from("") 
     };
 
-    for i in 0..nb_password/nb_node {
+    for i in 0..nb_password {
         for j in 0..nb_node {
-            reduce = reduction::reduce_xor(hash, j+constants::NONCE);
-            hash = sha3::sha3(&reduce);
-            //print!("valeur de j : {}    ",j);
-            if (j!=0) && (j+1!=nb_node) {
-                println!("étape intermédiaire : {}",reduce);
-            }
-
             if j == 0 { 
-                while contains(reduce.clone(),&mut starting_items) {
-                    hash = sha3::sha3(&reduce);
-                    reduce = reduction::reduce_xor(hash, j+constants::NONCE);
+                reduce = Box::leak(reduction::reduce_xor(hash,j+constants::NONCE).into_boxed_str());
+                while contains(reduce.to_string(),&mut starting_items) {
+                    reduce = Box::leak(generate(SIZE as usize,CHARSET).into_boxed_str());
                 }
                 println!("  start : {}",reduce);
-                node.start = reduce.clone();
-                starting_items.push(reduce);
+                node.start = reduce.to_string();
+                starting_items.push(reduce.to_string());
             } else if j+1 == nb_node {
+                hash = sha3::sha3(reduce);
+                reduce = Box::leak(reduction::reduce_xor(hash,j+constants::NONCE).into_boxed_str());
                 println!("  end : {}",reduce);
-                node.end = reduce.clone();
+                node.end = String::from(reduce.to_string());
+            } else {
+                hash = sha3::sha3(reduce);
+                reduce = Box::leak(reduction::reduce_xor(hash,j+constants::NONCE).into_boxed_str());
+                //print!("valeur de j : {}    ",j);
+                println!("étape intermédiaire : {}",reduce);
             }
         }
         rainbow_table.push(node.clone());
     }
+    //println!("{:?}",starting_items);
 }
 
 fn contains(elt:String, tab: &mut Vec::<String>) -> bool {

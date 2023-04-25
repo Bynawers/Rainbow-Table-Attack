@@ -1,6 +1,6 @@
 // RainbowTable
 pub const NONCE: u32 = 248820715;
-pub const NB_PASSWORD: u32 = 36;
+pub const NB_PASSWORD: u32 = 10;
 pub const NB_NODE: u32 = 4;
 
 // Reduction

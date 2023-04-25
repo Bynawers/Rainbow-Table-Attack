@@ -16,7 +16,7 @@ pub fn reduce_xor(hash: [u8; 32], nonce: u32) -> String {
         reduce[index] = hash[index] ^ nonce as u8;
     }
 
-    let password = to_password(&reduce);
+    let mut password = to_password(&reduce);
     password
 }
 

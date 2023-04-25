@@ -1,3 +1,4 @@
+use crate::attack::affiche_hash;
 use crate::rainbow_table;
 use crate::constants;
 use crate::sha3;
@@ -18,7 +19,7 @@ pub fn test(rainbow_table: &Vec<rainbow_table::Node>) {
             //}
             red = reduction::reduce_xor(hash, i+constants::NONCE);
             //print!("valeur de i : {}    ",i);
-            if i != constants::NB_NODE -1 {
+            if i+1 != constants::NB_NODE {
                 println!("étape intermédiaire de la ligne : {}",red);
             }
             all_passw.push(String::from(&red));
@@ -31,11 +32,12 @@ pub fn test(rainbow_table: &Vec<rainbow_table::Node>) {
 }
 
 fn test2() {
-    let mut red = String::from("c");
-    print!("test juste avec c \n");
+    let mut red = String::from("7");
+    print!("test juste avec {}\n",red);
     println!("start : {}",red);
     for i in 1..constants::NB_NODE {
         let hash = sha3::sha3(&red);
+        //affiche_hash(hash);
         red = reduction::reduce_xor(hash, i+constants::NONCE);
         if i != constants::NB_NODE -1 {
             println!("étape intermédiaire de la ligne : {}",red);
