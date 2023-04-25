@@ -128,14 +128,14 @@ fn extraction(big_tab:[[u64;5];5]) -> [u8;32] {
         }
     }
     
-    println!("{:?}",c);
+    //println!("{:?}",c);
     //println!("{:?}",hash_octet);
     //println!("{:b}",value.reverse_bits());
     //for elt in big_tab{}
     return hash_octet
 }
 
-pub fn sha3(password : &str) -> [u8;32] {
+pub fn digest(password : &str) -> [u8;32] {
     extraction(kecak(bit_to_tab(padding(password))))
     /*let c = padding(password);
     let tab = bit_to_tab(c);

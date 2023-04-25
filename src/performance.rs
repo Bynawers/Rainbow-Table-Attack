@@ -1,6 +1,6 @@
-use sha3::{Sha3_256, Digest};
 use std::time::{Instant, Duration};
 
+use crate::sha3;
 use crate::reduction;
 use crate::constants;
 
@@ -27,11 +27,11 @@ pub enum Error {
 // MOD => 0 collisions en 500 000 et 10.8s
 // TRUNCATE => 0 collisions en 500 000 et 10.7s
 // TRUNCATE + XOR => 0 collisions en 500 000 et 10.9s
-pub fn perf_reduction(message: &str, nb_node: u32, type_reduction: Reduction) -> Result<Performance, Error> {
+pub fn perf_reduction(nb_node: u32, type_reduction: Reduction) -> Result<Performance, Error> {
 
     let mut password_reduce: Vec<String> = Vec::new();
 
-    let mut hash = Sha3_256::digest(message.as_bytes());
+    let mut hash = sha3::digest(constants::GENERATOR_RAINBOW_TABLE);
     let mut reduce;
 
     let start = Instant::now();
@@ -56,7 +56,7 @@ pub fn perf_reduction(message: &str, nb_node: u32, type_reduction: Reduction) ->
         }
         //println!("{}", reduce);
         password_reduce.push(reduce.clone());
-        hash = Sha3_256::digest(reduce);
+        hash = sha3::digest(&reduce);
     }
 
     let end = Instant::now();

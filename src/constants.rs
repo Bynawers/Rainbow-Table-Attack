@@ -1,10 +1,11 @@
 // Attack
-pub const GENERATOR_RAINBOW_TABLE: &str = "Cryptographie";
+pub const GENERATOR_RAINBOW_TABLE: &str = "Crypto";
+pub const FLAG: &str = "je";
 
 // RainbowTable
 pub const NONCE: u32 = 248820715;
-pub const NB_PASSWORD: u32 = 36;
-pub const NB_NODE: u32 = 4;
+pub const NB_PASSWORD: u32 = 3000;
+pub const NB_NODE: u32 = 100;
 
 // Reduction
 pub const SIZE: u8 = 2;
