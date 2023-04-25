@@ -1,54 +1,64 @@
-use crate::sha3::sha3;
-use crate::reduction::reduce_truncate_xor;
+use crate::constants::SIZE;
+use crate::sha3;
+use random_string::generate;
+
+use crate::reduction;
 use crate::constants;
 
+pub const CHARSET: &str = "abcdefghijklmnopqrstuvwxyz0123456789";
 
 #[derive(Debug)]
 #[derive(Clone)]
-struct Node {
-    start: String,
-    end: String,
+pub struct Node {
+    pub start: String,
+    pub end: String,
 }
 
-
-fn generate_table(rainbow_table: &mut Vec<Node>, start: &str, nb_node: u32, nb_password: u32) {
-    let mut hash = sha3(start);
-    let mut reduce;
+pub fn generate_table(message: &str) -> Vec<Node> {
+    println!("rainbow tables pdt leur création :");
+    let mut rainbow_table : Vec<Node> = vec![];
+    let mut hash = sha3::sha3(message);
+    let mut reduce = generate(SIZE as usize,CHARSET);
+    let mut starting_items = Vec::<String>::new();
     let mut node = Node { 
         start: String::from(""), 
         end: String::from("") 
     };
 
-    for _i in 0..nb_password {
-        for j in 0..nb_node {
-            reduce = reduce_truncate_xor(hash.as_slice().try_into().unwrap(), j+constants::NONCE);
-            hash = sha3(&reduce.clone());
-            
-            if j == 0 {
-                node.start = reduce.clone();
-            } else if j+1 == nb_node {
-                node.end = reduce.clone();
+    for i in 0..constants::NB_PASSWORD {
+        for j in 0..constants::NB_NODE {
+            if j == 0 { 
+                reduce = reduction::reduce_xor(hash,j+constants::NONCE);
+                while contains(reduce.to_string(),&mut starting_items) {
+                    reduce = generate(SIZE as usize,CHARSET);
+                }
+                println!("  start : {}",reduce);
+                node.start = reduce.to_string();
+                starting_items.push(reduce.to_string());
+            } else if j+1 == constants::NB_NODE {
+                hash = sha3::sha3(&reduce);
+                reduce = reduction::reduce_xor(hash,j+constants::NONCE);
+                println!("  end : {}",reduce);
+                node.end = String::from(reduce.to_string());
+            } else {
+                hash = sha3::sha3(&reduce);
+                reduce = reduction::reduce_xor(hash,j+constants::NONCE);
+                //print!("valeur de j : {}    ",j);
+                println!("étape intermédiaire : {}",reduce);
             }
         }
         rainbow_table.push(node.clone());
     }
-    println!(" > {} ROUND :\n", constants::NB_NODE);
-
-    print_table(rainbow_table)
+    rainbow_table
+    //println!("{:?}",starting_items);
 }
 
-fn print_table(rainbow_table: &Vec<Node>) {
-
-    for element in rainbow_table {
-        println!("{:?} \n", element);
+fn contains(elt:String, tab: &mut Vec::<String>) -> bool {
+    for mdp in tab {
+        if mdp == &elt {
+            return true;
+        }
     }
+    return false;
 }
 
-pub fn rainbowtable(password : &str) {
-
-    let mut rainbow_table: Vec<Node> = Vec::new();
-
-    generate_table(&mut rainbow_table, password, constants::NB_NODE, constants::NB_PASSWORD);
-
-    //print_table(&rainbow_table);
-}
