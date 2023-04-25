@@ -24,7 +24,6 @@ pub fn execution() {
     //println!("\nAttack réussi ? {}", search_password(&mut rainbow_table, flag, constants::NB_NODE, constants::NB_PASSWORD));
 }
 
-
 pub fn affiche_hash(tab: [u8;32]) {
     for elt in tab {
         print!("{:0x}",elt);

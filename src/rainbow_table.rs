@@ -32,19 +32,19 @@ pub fn generate_table(rainbow_table: &mut Vec<Node>, message: &str, nb_node: u32
                 while contains(reduce.to_string(),&mut starting_items) {
                     reduce = Box::leak(generate(SIZE as usize,CHARSET).into_boxed_str());
                 }
-                println!("  start : {}",reduce);
+                //println!("  start : {}",reduce);
                 node.start = reduce.to_string();
                 starting_items.push(reduce.to_string());
             } else if j+1 == nb_node {
                 hash = sha3::sha3(reduce);
                 reduce = Box::leak(reduction::reduce_xor(hash,j+constants::NONCE).into_boxed_str());
-                println!("  end : {}",reduce);
+                //println!("  end : {}",reduce);
                 node.end = String::from(reduce.to_string());
             } else {
                 hash = sha3::sha3(reduce);
                 reduce = Box::leak(reduction::reduce_xor(hash,j+constants::NONCE).into_boxed_str());
                 //print!("valeur de j : {}    ",j);
-                println!("étape intermédiaire : {}",reduce);
+                //println!("étape intermédiaire : {}",reduce);
             }
         }
         rainbow_table.push(node.clone());
