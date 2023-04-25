@@ -12,16 +12,16 @@ fn padding(password : &str) -> u64 {
     let passacii = password.as_bytes();
     let mut padding64 : u64 = 0;
     let mut passwordlen = 0;
-    for i in 0..passacii.len() {
+    for (i,elt) in passacii.iter().enumerate() {
         if i != 0 {
-            padding64 = padding64 << 8;
+            padding64 <<= 8;
         }
-        padding64 = padding64 | passacii[i].reverse_bits() as u64;
+        padding64 |= elt.reverse_bits() as u64;
         passwordlen += 8;
     }
-    padding64 = padding64 << 3;
-    padding64 = padding64 | 0b11; // 01 c'est le domaine pour tous les SHA-3 et le derniers 1 et le premier 1 du bourage.
-    padding64 = padding64 << (64-passwordlen)-3;
+    padding64 <<= 3;
+    padding64 |= 0b11; // 01 c'est le domaine pour tous les SHA-3 et le derniers 1 et le premier 1 du bourage.
+    padding64 <<= ((64-passwordlen)-3);
     //println!("{}",format!("{:b}",padding64).len());
     padding64
 }
@@ -33,15 +33,15 @@ fn bit_to_tab(m:u64) -> [[u64;5];5]{
     [0b0,0b0,0b0,0b0,0b0],
     [0b0,0b0,0b0,0b0,0b0]];
     //println!("{:?}",big_tab);
-    return big_tab
+    big_tab
     
 }
 
-fn kecak(mut a : [[u64;5];5] ) -> [[u64;5];5]{
+fn keccak(mut a : [[u64;5];5] ) -> [[u64;5];5]{
     for i in 0..24 {
         a = round(a, RC[i]);
     }
-    return a
+    a
 }
 
 fn rot(a1:u64,r_dec:i16) -> u64 {
@@ -60,11 +60,11 @@ fn rot(a1:u64,r_dec:i16) -> u64 {
     //println!("{} : valeur donnée.",format!("{:b}", a1));
     rotate_bits |= y;
     //println!("{} : résultats.",format!("{:b}", rotate_bits));
-    return rotate_bits
+    rotate_bits
 }
 
 fn round(mut a : [[u64;5];5], v_rc : u64) -> [[u64;5];5] {
-    // teta
+    /*// teta
     let mut c: [u64 ; 5] = [0,0,0,0,0];
     for x in 0..=4 {
         c[x] = a[x][0] ^ a[x][1] ^ a[x][2] ^ a[x][3] ^ a[x][4];
@@ -98,15 +98,59 @@ fn round(mut a : [[u64;5];5], v_rc : u64) -> [[u64;5];5] {
     // T
     //println!("{:}",v_rc);
     a[0][0] = a[0][0] ^ v_rc;
-    return a
+    a*/
+    let a_theta = theta(a);
+    iota(chi(a_theta,rho_pi(a_theta)),v_rc)
 }
 
+fn theta(mut a : [[u64;5];5]) -> [[u64;5];5]{
+    let mut c: [u64 ; 5] = [0,0,0,0,0];
+    for x in 0..=4 {
+        c[x] = a[x][0] ^ a[x][1] ^ a[x][2] ^ a[x][3] ^ a[x][4];
+    }
+    //println!("{:?} :a",a);
+    let mut d: [u64 ; 5] = [0,0,0,0,0];
+    
+    for x in 0..=4 {
+        d[x] = c[(x+5-1) % 5] ^ rot(c[(x+1)%5],1); // faire un shift sur [c[x+1]][1] pour qu'il boufe de i à i + R
+    }
+    //println!("{:?} :c",c);
+    //println!("{:?}",d);
+    for x in 0..=4{
+        for y in 0..=4{
+            a[x][y] = a[x][y] ^ d[x]
+        }
+    }
+    a 
+}
 
+fn rho_pi(a : [[u64;5];5]) -> [[u64;5];5]{
+    let mut b: [[u64;5];5] = [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]];
+    for x in 0..=4{
+        for y in 0..=4{
+            b[y][(((2*x) + (3*y)) % 5)] = rot(a[x][y],R[x][y]) // faire un shift sur [a[x][y]][R[x][y]] pour qu'il boufe de i à i + R
+        }
+    }
+    b
+}
 
+fn chi(mut a : [[u64;5];5], b : [[u64;5];5],) -> [[u64;5];5]{
+    for x in 0..=4{
+        for y in 0..=4{
+            a[x][y] = b[x][y] ^ ((!b[(x+1)%5][y]) & b[(x+2)%5][y])
+        }
+    }
+    a
+}
+
+fn iota(mut a : [[u64;5];5], v_rc :u64) -> [[u64;5];5]{
+    a[0][0] = a[0][0] ^ v_rc;
+    a
+}
 
 fn extraction(big_tab:[[u64;5];5]) -> [u8;32] {
     let mut hash_octet : [u8;32] = [0;32];
-    let mut c : String = String::new();
+    //let mut c : String = String::new();
     //println!("{:?}",big_tab[0]);
     //let tab : [u64;4] = [0x5C19BAE5F247A44D,0x203AE8B4D6CB09BD,0xA1FA10767CB94ADA,0x62FD47A288C2A84C];
     //let value : u64 = 0x5C19BAE5F247A44D;
@@ -126,7 +170,7 @@ fn extraction(big_tab:[[u64;5];5]) -> [u8;32] {
             //println!("{}",i);
             hash_octet[i+ j*8] = octet_reverse;
             //println!("{:02x}",octet_reverse);
-            c = c + format!("{:02x}",octet_reverse).as_str();
+            //c = c + format!("{:02x}",octet_reverse).as_str();
         }
     }
     
@@ -134,11 +178,11 @@ fn extraction(big_tab:[[u64;5];5]) -> [u8;32] {
     //println!("{:?}",hash_octet);
     //println!("{:b}",value.reverse_bits());
     //for elt in big_tab{}
-    return hash_octet
+    hash_octet
 }
 
 pub fn sha3(password : &str) -> [u8;32] {
-    extraction(kecak(bit_to_tab(padding(password))))
+    extraction(keccak(bit_to_tab(padding(password))))
     /*let c = padding(password);
     let tab = bit_to_tab(c);
     //println!("{:?}",tab);
