@@ -25,8 +25,23 @@ pub fn test(rainbow_table: &Vec<rainbow_table::Node>) {
             }
         println!("  end {}",red);
     }
-    println!("{:?}",all_passw);
+    //println!("{:?}",all_passw);
+    test2();
     //println!("pourcentage des mdp testés : {}",(all_passw.len() as f32 / constants::NB_PASSWORD as f32)*100.0);
+}
+
+fn test2() {
+    let mut red = String::from("c");
+    print!("test juste avec c \n");
+    println!("start : {}",red);
+    for i in 1..constants::NB_NODE {
+        let hash = sha3::sha3(&red);
+        red = reduction::reduce_xor(hash, i+constants::NONCE);
+        if i != constants::NB_NODE -1 {
+            println!("étape intermédiaire de la ligne : {}",red);
+        }
+    }
+    println!("end {}",red);
 }
 
 fn contains(truc:&str,vector:&Vec<&str>) -> bool {
