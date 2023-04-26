@@ -1,5 +1,5 @@
 [package]
-name = "rainbow_table"
+name = "rainbow_table_attack"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 sha3 = "0.10.6"
-generic-array = "0.14.7"
-hex = "0.4.3"
-ascii_converter = "0.3.0"
+colored = "2"
+random-string = "1.0.0"
+serde_json = "1.0.96"
+serde = { version = "1.0.104", features = ["derive"] }
