@@ -1,6 +1,6 @@
 use std::time::{Instant, Duration};
 
-use crate::sha3;
+use crate::sha3::sha3;
 use crate::reduction;
 use crate::constants;
 
@@ -31,7 +31,7 @@ pub fn perf_reduction(nb_node: u32, type_reduction: Reduction) -> Result<Perform
 
     let mut password_reduce: Vec<String> = Vec::new();
 
-    let mut hash = sha3::digest(constants::GENERATOR_RAINBOW_TABLE);
+    let mut hash = sha3(constants::GENERATOR_RAINBOW_TABLE);
     let mut reduce;
 
     let start = Instant::now();
@@ -56,7 +56,7 @@ pub fn perf_reduction(nb_node: u32, type_reduction: Reduction) -> Result<Perform
         }
         //println!("{}", reduce);
         password_reduce.push(reduce.clone());
-        hash = sha3::digest(&reduce);
+        hash = sha3(&reduce);
     }
 
     let end = Instant::now();

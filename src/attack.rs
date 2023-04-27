@@ -1,4 +1,4 @@
-use crate::sha3;
+use crate::sha3::sha3;
 use crate::reduction;
 
 use crate::constants::*;
@@ -10,7 +10,7 @@ pub fn execution(rainbow_table: &mut Vec<Node>) -> bool {
 
     let mut position_flag;
 
-    let hash_flag = sha3::digest(FLAG);
+    let hash_flag = sha3(FLAG);
     let mut reduce = reduction::reduce_truncate_xor(hash_flag, NONCE);
 
     for i in 0..NB_NODE {
@@ -18,7 +18,7 @@ pub fn execution(rainbow_table: &mut Vec<Node>) -> bool {
         println!("{}","\n> Attack Node.. ".yellow());
         for j in NB_NODE-(i+1)..NB_NODE {
             
-            let tmp = sha3::digest(&reduce.clone());
+            let tmp = sha3(&reduce.clone());
             reduce = reduction::reduce_truncate_xor(tmp, j+NONCE);
             
             if DEBUG {
@@ -69,7 +69,7 @@ fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u3
     println!("{}", "> Recrate node..".yellow());
     println!("Position {} : ( first : {}, end: {} )", position_flag, rainbow_table[position_flag as usize].start, rainbow_table[position_flag as usize].end);
     let mut reduce = rainbow_table[position_flag as usize].start.clone();
-    let mut hash = sha3::digest(&reduce);
+    let mut hash = sha3(&reduce);
 
     for i in 0..NB_NODE+1 {
 
@@ -81,7 +81,7 @@ fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u3
         }
 
         reduce = reduction::reduce_truncate_xor(hash, i+NONCE);
-        hash = sha3::digest(&reduce);
+        hash = sha3(&reduce);
     }
     println!("{}", "FLAG not found".red());
     return false;

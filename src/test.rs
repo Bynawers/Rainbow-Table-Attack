@@ -1,5 +1,5 @@
 use crate::rainbow_table;
-use crate::sha3;
+use crate::sha3::sha3;
 use crate::reduction;
 
 use crate::constants::*;
@@ -18,7 +18,7 @@ pub fn test(rainbow_table: &Vec<rainbow_table::Node>) {
         }
 
         for i in 1..NB_NODE {
-            let hash = sha3::digest(&red.clone());
+            let hash = sha3(&red.clone());
 
             red = reduction::reduce_xor(hash, i+NONCE);
             
@@ -44,7 +44,7 @@ fn test2() {
     println!("start : {}",red);
 
     for i in 1..NB_NODE {
-        let hash = sha3::digest(&red);
+        let hash = sha3(&red);
         //affiche_hash(hash);
         red = reduction::reduce_xor(hash, i+NONCE);
 
