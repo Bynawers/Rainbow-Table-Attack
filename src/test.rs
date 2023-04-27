@@ -19,7 +19,7 @@ pub fn test(rainbow_table: &Vec<rainbow_table::Node>) {
             //if i == 0 {
             //    attack::affiche_hash(hash);
             //}
-            red = reduction::reduce_truncate_xor(hash, 2*i+constants::NONCE);
+            red = reduction::reduce_xor(hash, 2*i+constants::NONCE);
             if !contains(&red,&all_passw) {
                 all_passw.push(String::from(red.clone()));
             }
@@ -43,7 +43,7 @@ fn test2() {
     for i in 1..constants::NB_NODE {
         let hash = sha3::sha3(&red);
         //affiche_hash(hash);
-        red = reduction::reduce_truncate_xor(hash, i+constants::NONCE);
+        red = reduction::reduce_xor(hash, i+constants::NONCE);
         if i != constants::NB_NODE -1 {
             println!("étape intermédiaire de la ligne : {}",red);
         }
