@@ -28,7 +28,7 @@ pub fn generate_table(rainbow_table: &mut Vec<Node>, message: &str, nb_node: u32
     for i in 0..nb_password {
         for j in 0..nb_node {
             if j == 0 { 
-                reduce = Box::leak(reduction::reduce_xor(hash,j+constants::NONCE).into_boxed_str());
+                reduce = Box::leak(reduction::reduce_truncate_xor(hash,2*j+constants::NONCE).into_boxed_str());
                 while contains(reduce.to_string(),&mut starting_items) {
                     reduce = Box::leak(generate(SIZE as usize,CHARSET).into_boxed_str());
                 }
@@ -37,12 +37,12 @@ pub fn generate_table(rainbow_table: &mut Vec<Node>, message: &str, nb_node: u32
                 starting_items.push(reduce.to_string());
             } else if j+1 == nb_node {
                 hash = sha3::sha3(reduce);
-                reduce = Box::leak(reduction::reduce_xor(hash,j+constants::NONCE).into_boxed_str());
+                reduce = Box::leak(reduction::reduce_truncate_xor(hash,2*j+constants::NONCE).into_boxed_str());
                 //println!("  end : {}",reduce);
                 node.end = String::from(reduce.to_string());
             } else {
                 hash = sha3::sha3(reduce);
-                reduce = Box::leak(reduction::reduce_xor(hash,j+constants::NONCE).into_boxed_str());
+                reduce = Box::leak(reduction::reduce_truncate_xor(hash,2*j+constants::NONCE).into_boxed_str());
                 //print!("valeur de j : {}    ",j);
                 //println!("étape intermédiaire : {}",reduce);
             }
