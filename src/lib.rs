@@ -5,3 +5,4 @@ pub mod rainbow_table;
 pub mod constants;
 pub mod test;
 pub mod sha3;
+pub mod file;

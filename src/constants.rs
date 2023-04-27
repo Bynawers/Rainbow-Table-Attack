@@ -1,13 +1,12 @@
 // Attack
 pub const GENERATOR_RAINBOW_TABLE: &str = "Crypto";
-pub const FLAG: &str = "fff";
+pub const FLAG: &str = "aaa";
 
 // Create RainbowTable
 pub const NONCE: u32 = 248820715;
 
 pub const NB_PASSWORD: u32 = 500;
 pub const NB_NODE: u32 = 200;
-pub const RAINBOW_TABLE_PATH: &str = format!("./data/RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE);
 
 // Mot de Passe
 pub const SIZE: u8 = 3;
@@ -21,3 +20,8 @@ pub const DEBUG: bool = false;
 // 36² = 1256       (100, 50) = 5000
 // 36³ = 46 656     (500, 200) = 100 000
 // 36⁴ = 1 679 616
+
+
+// 2 letttes: (60, 160) 95%
+// 
+//

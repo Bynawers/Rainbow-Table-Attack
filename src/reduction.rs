@@ -1,5 +1,46 @@
 use crate::constants;
 
+pub fn reduction(hash: [u8; 32], nonce: u32) -> String {
+    return reduce_xor_mod(hash, nonce);
+}
+
+pub fn reduce_xor_lvl2(hash: [u8; 32], nonce: u32) -> String {
+    let mut reduce: [u8; 32] = [0; 32];
+
+    //println!("{:?}", hash);
+    for index in 0..8 {
+        let mut bytes = [0u8; 4];
+        bytes[..4].copy_from_slice(&hash[index*4..index*4+4]);
+        let number = u32::from_be_bytes(bytes);
+        let operation = number ^ nonce;
+        let result = operation.to_be_bytes();
+    
+        reduce[index*4] = result[0]; 
+        reduce[index*4 + 1] = result[1]; 
+        reduce[index*4 + 2] = result[2]; 
+        reduce[index*4 + 3] = result[3];
+        //reduce[i] = hash[i] ^ nonce as u32;
+    }
+
+    let password = to_password(&reduce);
+    password
+}
+
+pub fn reduce_xor_mod(hash: [u8; 32], nonce: u32) -> String {
+    let mut reduce: [u8; 32] = [0; 32];
+
+    for index in 0..32 {
+        reduce[index] = hash[index] ^ nonce as u8;
+        if nonce == 0 {
+            reduce[index] = hash[index] % 1 as u8;
+        }
+        reduce[index] = hash[index] ^ nonce as u8;
+    }
+
+    let password = to_password(&reduce);
+    password
+}
+
 pub fn reduce_xor(hash: [u8; 32], nonce: u32) -> String {
     let mut reduce: [u8; 32] = [0; 32];
 
