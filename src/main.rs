@@ -13,7 +13,7 @@ fn main() {
             "attack" => {
                 let mut rainbow_table: Vec<Node> = deserialize().unwrap();
 
-                attack::execution(&mut rainbow_table); 
+                attack::execution(&mut rainbow_table);
             }
             "perf" => { 
                 println!("Performance...");
@@ -26,12 +26,10 @@ fn main() {
             }
             "table" => {
                 println!("> passwords: {} nodes: {}", NB_PASSWORD, NB_NODE);
-                println!("> Path: {}", RAINBOW_TABLE_PATH);
                 println!("> RainbowTable Password Total: {}", NB_PASSWORD * NB_NODE);
                 println!("> Language Password Total: {}", (SIGMA_SIZE as u64).pow(SIZE as u32));
                 println!("Create RainbowTable...");
-                let mut rainbow_table: Vec<Node> = Vec::new();
-                generate_table(&mut rainbow_table);
+                let mut rainbow_table: Vec<Node> = generate_table();
                 serialize(&rainbow_table).unwrap();
             }
             "test" => {
