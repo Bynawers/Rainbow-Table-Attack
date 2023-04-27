@@ -7,7 +7,6 @@ pub const NONCE: u32 = 248820715;
 
 pub const NB_PASSWORD: u32 = 500;
 pub const NB_NODE: u32 = 200;
-pub const RAINBOW_TABLE_PATH: &str = format!("./data/RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE);
 
 // Mot de Passe
 pub const SIZE: u8 = 3;
