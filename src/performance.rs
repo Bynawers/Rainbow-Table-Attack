@@ -1,9 +1,8 @@
 use std::time::{Instant, Duration};
-use crate::sha3;
 
+use crate::sha3::sha3;
 use crate::reduction;
-
-const NONCE: u32 = 248820715;
+use crate::constants;
 
 #[derive(Debug)] 
 pub struct Performance {
@@ -28,11 +27,11 @@ pub enum Error {
 // MOD => 0 collisions en 500 000 et 10.8s
 // TRUNCATE => 0 collisions en 500 000 et 10.7s
 // TRUNCATE + XOR => 0 collisions en 500 000 et 10.9s
-pub fn perf_reduction(message: &str, nb_node: u32, type_reduction: Reduction) -> Result<Performance, Error> {
+pub fn perf_reduction(nb_node: u32, type_reduction: Reduction) -> Result<Performance, Error> {
 
     let mut password_reduce: Vec<String> = Vec::new();
 
-    let mut hash = sha3::sha3(message);
+    let mut hash = sha3(constants::GENERATOR_RAINBOW_TABLE);
     let mut reduce;
 
     let start = Instant::now();
@@ -40,16 +39,16 @@ pub fn perf_reduction(message: &str, nb_node: u32, type_reduction: Reduction) ->
     for i in 0..nb_node {
         match type_reduction {
             Reduction::Xor => {
-                reduce = reduction::reduce_xor(hash.as_slice().try_into().unwrap(), i+NONCE);
+                reduce = reduction::reduce_xor(hash.as_slice().try_into().unwrap(), i+constants::NONCE);
             },
             Reduction::Modulo => {
-                reduce = reduction::reduce_mod(hash.as_slice().try_into().unwrap(), i+NONCE);
+                reduce = reduction::reduce_mod(hash.as_slice().try_into().unwrap(), i+constants::NONCE);
             },
             Reduction::Truncate => {
-                reduce = reduction::reduce_truncate(hash.as_slice().try_into().unwrap(), i+NONCE);
+                reduce = reduction::reduce_truncate(hash.as_slice().try_into().unwrap(), i+constants::NONCE);
             },
             Reduction::TruncateXor => {
-                reduce = reduction::reduce_truncate_xor(hash.as_slice().try_into().unwrap(), i+NONCE);
+                reduce = reduction::reduce_truncate_xor(hash.as_slice().try_into().unwrap(), i+constants::NONCE);
             },
             _ => {
                 return Err(Error::UnknowTypeError);
@@ -57,7 +56,7 @@ pub fn perf_reduction(message: &str, nb_node: u32, type_reduction: Reduction) ->
         }
         //println!("{}", reduce);
         password_reduce.push(reduce.clone());
-        hash = sha3::sha3(reduce.as_str());
+        hash = sha3(&reduce);
     }
 
     let end = Instant::now();
