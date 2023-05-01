@@ -27,7 +27,7 @@ enum Command {
     },
     #[structopt(name = "test")]
     Test {
-    
+        
     },
 }
 

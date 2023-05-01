@@ -36,7 +36,13 @@ cargo run attack
 
 Check the performance of the reduction functions and the rainbow table
 ```
-cargo run perf
+cargo run perf -t <type>
+```
+With theses types : 
+```
+reduction
+attack
+table
 ```
 
 Unit test of SHA-3-256 functions
