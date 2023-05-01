@@ -6,7 +6,8 @@ use crate::reduction::reduction;
 
 use crate::constants::*;
 
-pub const CHARSET: &str = "abcdefghijklmnopqrstuvwxyz0123456789";
+//pub const CHARSET: &str = "abcdefghijklmnopqrstuvwxyz0123456789";
+pub const CHARSET: &str = "abcdefghijklmnopqrstuvwxyz";
 
 
 #[derive(Clone, Serialize, Deserialize, Debug)]

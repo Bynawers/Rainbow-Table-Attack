@@ -11,12 +11,6 @@ pub fn serialize<T>(data: &Vec<T>) -> Result<()>
 where
     T: serde::Serialize,
 {
-
-    if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE)) {
-        println!("Existing file found !");
-        return Ok(());
-    }
-
     println!("Save file...");
 
     let json_string = serde_json::to_string(data)?;
@@ -42,7 +36,7 @@ pub fn deserialize() -> Result<Vec<Node>> {
     Ok(nodes)
 }
 
-fn file_exists_in_directory(directory: &str, filename: &str) -> bool {
+pub fn file_exists_in_directory(directory: &str, filename: &str) -> bool {
     if let Ok(files) = fs::read_dir(directory) {
         for file in files {
             if let Ok(file) = file {

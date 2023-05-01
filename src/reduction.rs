@@ -1,7 +1,7 @@
 use crate::constants;
 
 pub fn reduction(hash: [u8; 32], nonce: u32) -> String {
-    return reduce_xor_mod(hash, nonce);
+    return reduce_xor(hash, nonce);
 }
 
 pub fn reduce_xor_lvl2(hash: [u8; 32], nonce: u32) -> String {

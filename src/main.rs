@@ -1,61 +1,104 @@
 use rainbow_table_attack::attack;
-use rainbow_table_attack::performance;
+use rainbow_table_attack::performance::*;
 use rainbow_table_attack::rainbow_table::*;
-use rainbow_table_attack::test::*;
-use rainbow_table_attack::sha3::sha3;
 use rainbow_table_attack::constants::*;
-use rainbow_table_attack::reduction::reduction;
 use rainbow_table_attack::file::*;
-use std::env;
+
+use structopt::StructOpt;
+
+#[derive(StructOpt)]
+#[structopt(name = "combat", about = "A command-line simulation of combat")]
+struct Cli {
+    #[structopt(subcommand)]
+    cmd: Command,
+}
+
+#[derive(StructOpt)]
+enum Command {
+    #[structopt(name = "attack")]
+    Attack {
+        #[structopt(short = "s", long = "save")]
+        save: bool,
+    },
+    #[structopt(name = "perf")]
+    Performance {
+        #[structopt(short = "t", long = "type", possible_values=&["attack", "reduction", "table"])]
+        type_perf: Option<String>,
+    },
+    #[structopt(name = "test")]
+    Test {
+    
+    },
+}
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let args = Cli::from_args();
 
-    if args.len() == 2 {
-        match args[1].as_str() {
-            "attack" => {
-                create_table();
-                let mut rainbow_table: Vec<Node> = deserialize().unwrap();
-
-                attack::execution(&mut rainbow_table, FLAG); 
+    match args.cmd {
+        Command::Attack { save } => {
+            println!("Attack... with option ? : {}", save);
+            if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE)) {
+                println!("Existing file found !");
             }
-            "perf" => { 
-                println!("Performance...");
-                let performance = performance::perf_reduction(500000, performance::Reduction::TruncateXor);
+            else {
+                create_table();
+            }
+            let mut rainbow_table: Vec<Node> = deserialize().unwrap();
 
-                match performance {
-                    Ok(value) => { println!("> Performance Reduction\n    collision: {:?}\n    time: {:?}", value.collision, value.time) },
-                    Err(e) => { println!("> Error : {:?}", e) }
+            attack::execution(&mut rainbow_table, FLAG); 
+        }
+        Command::Performance { type_perf } => {
+            println!("Performance...");
+            let performance: Option<Performance>;
+
+            match type_perf {
+                None => performance = None,
+                Some(value) => {
+                    match value.as_str() {
+                        "reduction" => {
+                            performance = Some(perf_reduction());
+                        },
+                        "attack" => {
+                            performance = Some(perf_attack());
+                        }
+                        "table" => {
+                            create_table();
+                            let rainbow_table: Vec<Node> = deserialize().unwrap();
+                            performance = Some(perf_rainbow_table(&rainbow_table));
+                        }
+                        _ => performance = None
+                    }
                 }
             }
-            "table" => {
-                create_table();
+            match performance {
+                Some(value) => { 
+                    println!("> Performance {:?}", value.type_perf);
+                    println!("      time: {:?}", value.time);
+                    println!("      percent test: {:?}%", value.percent.unwrap());
+                    },
+                None => ()
             }
-            "test" => {
-                create_table();
-                let rainbow_table: Vec<Node> = deserialize().unwrap();
-
-                let hash_flag = sha3("Crypto");
-                let reduce = reduction(hash_flag, NONCE);
-                //println!("{:?}", reduce);
-                percent_of_password(&rainbow_table);
-                //performance::perf_attack();
-            }
-            "delete" => {
-                delete_file_in_directory("./data", &format!("RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE)).unwrap();
-            }
-            _ => { println!("bad args"); }
         }
-    } else {
-        panic!("too many arguments in prompt");
+        Command::Test { } => {
+            println!("Test..");
+
+            // Bordel ici
+
+        }
     }
 }
 
 fn create_table() {
-    println!("> passwords: {} nodes: {}", NB_PASSWORD, NB_NODE);
+    println!("> Passwords: {} Nodes: {}", NB_PASSWORD, NB_NODE);
     println!("> RainbowTable Password Total: {}", NB_PASSWORD * NB_NODE);
     println!("> Language Password Total: {}", (SIGMA_SIZE as u64).pow(SIZE as u32));
-    println!("Create RainbowTable...");
-    let rainbow_table: Vec<Node> = generate_table();
-    serialize(&rainbow_table).unwrap();
+
+    if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE)) {
+        println!("RainbowTable already exist !");
+    }
+    else {
+        println!("Create RainbowTable...");
+        let rainbow_table: Vec<Node> = generate_table();
+        serialize(&rainbow_table).unwrap();
+    }
 }

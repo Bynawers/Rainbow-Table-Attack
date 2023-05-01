@@ -21,7 +21,7 @@ fn padding(password : &str) -> u64 {
     }
     padding64 <<= 3;
     padding64 |= 0b11; // 01 c'est le domaine pour tous les SHA-3 et le derniers 1 et le premier 1 du bourage.
-    padding64 <<= ((64-passwordlen)-3);
+    padding64 <<= (64-passwordlen)-3;
     //println!("{}",format!("{:b}",padding64).len());
     padding64
 }
@@ -63,7 +63,7 @@ fn rot(a1:u64,r_dec:i16) -> u64 {
     rotate_bits
 }
 
-fn round(mut a : [[u64;5];5], v_rc : u64) -> [[u64;5];5] {
+fn round(a : [[u64;5];5], v_rc : u64) -> [[u64;5];5] {
     /*// teta
     let mut c: [u64 ; 5] = [0,0,0,0,0];
     for x in 0..=4 {

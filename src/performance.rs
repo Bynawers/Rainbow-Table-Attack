@@ -1,7 +1,8 @@
 use std::time::{Instant, Duration};
+use structopt::StructOpt;
 
 use crate::sha3::sha3;
-use crate::reduction;
+use crate::reduction::reduction;
 use crate::constants::*;
 use crate::rainbow_table::*;
 use crate::attack;
@@ -9,28 +10,27 @@ use crate::file::*;
 
 #[derive(Debug)] 
 pub struct Performance {
-    pub reduction_type: Option<Reduction>,
+    pub type_perf: Type,
+    pub percent: Option<f32>,
     pub collision: Option<usize>,
     pub time: Duration
 }
 
+#[derive(StructOpt)]
 #[derive(Debug)] 
-pub enum Reduction {
-    Xor,
-    Modulo,
-    Truncate,
-    TruncateXor
+pub enum Type {
+    Reduction,
+    Attack,
+    RainbowTable
 }
 #[derive(Debug)] 
 pub enum Error {
     UnknowTypeError,
 }
 
-// XOR => 0 collisions en 500 000 et 10.7s
-// MOD => 0 collisions en 500 000 et 10.8s
-// TRUNCATE => 0 collisions en 500 000 et 10.7s
-// TRUNCATE + XOR => 0 collisions en 500 000 et 10.9s
-pub fn perf_reduction(nb_node: u32, type_reduction: Reduction) -> Result<Performance, Error> {
+const NB_PASSWORD_TOTAL: u64 = (SIGMA_SIZE as u64).pow(SIZE as u32);
+
+pub fn perf_reduction() -> Performance {
 
     let mut password_reduce: Vec<String> = Vec::new();
 
@@ -39,39 +39,24 @@ pub fn perf_reduction(nb_node: u32, type_reduction: Reduction) -> Result<Perform
 
     let start = Instant::now();
 
-    for i in 0..nb_node {
-        match type_reduction {
-            Reduction::Xor => {
-                reduce = reduction::reduce_xor(hash.as_slice().try_into().unwrap(), i+NONCE);
-            },
-            Reduction::Modulo => {
-                reduce = reduction::reduce_mod(hash.as_slice().try_into().unwrap(), i+NONCE);
-            },
-            Reduction::Truncate => {
-                reduce = reduction::reduce_truncate(hash.as_slice().try_into().unwrap(), i+NONCE);
-            },
-            Reduction::TruncateXor => {
-                reduce = reduction::reduce_truncate_xor(hash.as_slice().try_into().unwrap(), i+NONCE);
-            },
-            _ => {
-                return Err(Error::UnknowTypeError);
-            }
+    for i in 0..NB_NODE*NB_PASSWORD {
+        
+        reduce = reduction(hash.as_slice().try_into().unwrap(), i+NONCE);
+        if !contains(&reduce, &password_reduce) {
+            password_reduce.push(reduce.clone());
         }
-        //println!("{}", reduce);
-        password_reduce.push(reduce.clone());
         hash = sha3(&reduce);
     }
 
     let end = Instant::now();
     let duration = end - start;
 
-    password_reduce.sort();
+    println!("test {} / {} {}", password_reduce.len(), NB_NODE*NB_PASSWORD, (password_reduce.len() as f32/(NB_NODE*NB_PASSWORD) as f32)*100.0);
 
-    let nb_collision = collision(&password_reduce);
-    return Ok(Performance { reduction_type: None, collision: Some(nb_collision), time: duration });
+    return Performance { type_perf: Type::Reduction, percent: Some(0.0), collision: Some(0.0 as usize), time: duration };
 }
 
-pub fn perf_attack() -> Result<Performance, Error> {
+pub fn perf_attack() -> Performance {
 
     let mut rainbow_table: Vec<Node> = deserialize().unwrap();
 
@@ -80,18 +65,54 @@ pub fn perf_attack() -> Result<Performance, Error> {
 
     let start = Instant::now();
 
-    for password in 10..(10 as u64).pow(SIZE as u32) {
-        //print!("{} => ",&password.to_string());
-        attack::execution(&mut rainbow_table, &password.to_string());
+    for password in 100..(10 as u64).pow(SIZE as u32) {
+        
+        if attack::execution(&mut rainbow_table, &password.to_string()) {
+            success += 1;
+        }
+        else {
+            fail += 1;
+        }
     }
 
     let end = Instant::now();
     let duration = end - start;
 
-    return Ok(Performance { reduction_type: None, collision: None, time: duration });
+    return Performance { type_perf: Type::Attack, percent: Some((success / (success + fail)) as f32), collision: None, time: duration };
 }
 
-fn collision<T: PartialEq>(vec: &[T]) -> usize {
+pub fn perf_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
+
+    let mut all_passw = Vec::<String>::new();
+
+    let start = Instant::now();
+
+    for elt in rainbow_table {
+        let mut red = elt.start.clone();
+
+        if !contains(&red,&all_passw) {
+            all_passw.push(String::from(red.clone()));
+        }
+
+        for i in 1..NB_NODE {
+            let hash = sha3(&red.clone());
+
+            red = reduction(hash, i+NONCE);
+            
+            if !contains(&red, &all_passw) {
+                all_passw.push(String::from(red.clone()));
+            }
+        }
+    }
+
+    let end = Instant::now();
+    let duration = end - start;
+
+    return Performance { type_perf: Type::RainbowTable, percent: Some(all_passw.len() as f32 / NB_PASSWORD_TOTAL as f32 *100.0) ,collision: None, time: duration };
+}
+
+
+fn collision<T: PartialEq>(vec: &[T]) -> u32 {
     let mut count = 0;
     let len = vec.len();
 
@@ -106,4 +127,12 @@ fn collision<T: PartialEq>(vec: &[T]) -> usize {
     }
 
     count
+}
+fn contains(truc:&str, vector:&Vec<String>) -> bool {
+    for elt in vector {
+        if truc == elt {
+            return true;
+        }
+    }
+    return false;
 }
