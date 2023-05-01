@@ -21,7 +21,7 @@ fn padding(password : &str) -> u64 {
     }
     padding64 <<= 3;
     padding64 |= 0b11; // 01 c'est le domaine pour tous les SHA-3 et le derniers 1 et le premier 1 du bourage.
-    padding64 <<= ((64-passwordlen)-3);
+    padding64 <<= (64-passwordlen)-3;
     //println!("{}",format!("{:b}",padding64).len());
     padding64
 }
@@ -63,7 +63,42 @@ fn rot(a1:u64,r_dec:i16) -> u64 {
     rotate_bits
 }
 
-fn round(mut a : [[u64;5];5], v_rc : u64) -> [[u64;5];5] {
+fn round(a : [[u64;5];5], v_rc : u64) -> [[u64;5];5] {
+    /*// teta
+    let mut c: [u64 ; 5] = [0,0,0,0,0];
+    for x in 0..=4 {
+        c[x] = a[x][0] ^ a[x][1] ^ a[x][2] ^ a[x][3] ^ a[x][4];
+    }
+    //println!("{:?} :a",a);
+    let mut d: [u64 ; 5] = [0,0,0,0,0];
+    
+    for x in 0..=4 {
+        d[x] = c[(x+5-1) % 5] ^ rot(c[(x+1)%5],1); // faire un shift sur [c[x+1]][1] pour qu'il boufe de i à i + R
+    }
+    //println!("{:?} :c",c);
+    //println!("{:?}",d);
+    for x in 0..=4{
+        for y in 0..=4{
+            a[x][y] = a[x][y] ^ d[x]
+        }
+    } 
+    // p et pi
+    let mut b: [[u64;5];5] = [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]];
+    for x in 0..=4{
+        for y in 0..=4{
+            b[y][(((2*x) + (3*y)) % 5)] = rot(a[x][y],R[x][y]) // faire un shift sur [a[x][y]][R[x][y]] pour qu'il boufe de i à i + R
+        }
+    }
+    //println!("{:?} : b",b); // j'ai pas verifier tous les elt du b
+    for x in 0..=4{
+        for y in 0..=4{
+            a[x][y] = b[x][y] ^ ((!b[(x+1)%5][y]) & b[(x+2)%5][y])
+        }
+    }
+    // T
+    //println!("{:}",v_rc);
+    a[0][0] = a[0][0] ^ v_rc;
+    a*/
     let a_theta = theta(a);
     iota(chi(a_theta,rho_pi(a_theta)),v_rc)
 }
