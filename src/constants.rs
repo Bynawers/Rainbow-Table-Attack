@@ -19,7 +19,7 @@ pub const SIGMA: [char; SIGMA_SIZE as usize] = [ '0', '1', '2', '3', '4', '5', '
 pub const SIGMA_SIZE: u8 = 36; */
 
 // Debug
-pub const DEBUG: bool = false;
+pub const DEBUG: bool = true;
 
 // 36² = 1256       (100, 50) = 5000
 // 36³ = 46 656     (500, 200) = 100 000
