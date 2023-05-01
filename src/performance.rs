@@ -1,6 +1,5 @@
-use sha3::{Sha3_256, Digest};
 use std::time::{Instant, Duration};
-
+use crate::sha3::sha3;
 use crate::reduction;
 
 const NONCE: u32 = 248820715;
@@ -32,7 +31,7 @@ pub fn perf_reduction(message: &str, nb_node: u32, type_reduction: Reduction) ->
 
     let mut password_reduce: Vec<String> = Vec::new();
 
-    let mut hash = Sha3_256::digest(message.as_bytes());
+    let mut hash = sha3(message);
     let mut reduce;
 
     let start = Instant::now();
@@ -57,7 +56,7 @@ pub fn perf_reduction(message: &str, nb_node: u32, type_reduction: Reduction) ->
         }
         //println!("{}", reduce);
         password_reduce.push(reduce.clone());
-        hash = Sha3_256::digest(reduce);
+        hash = sha3(&reduce);
     }
 
     let end = Instant::now();
