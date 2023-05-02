@@ -3,6 +3,9 @@ use rainbow_table_attack::performance::*;
 use rainbow_table_attack::rainbow_table::*;
 use rainbow_table_attack::constants::*;
 use rainbow_table_attack::file::*;
+use rainbow_table_attack::para::pool;
+use std::time::{Instant, Duration};
+
 
 use structopt::StructOpt;
 
@@ -80,10 +83,21 @@ fn main() {
             }
         }
         Command::Test { } => {
-            println!("Test..");
-
-            // Bordel ici
-
+            /*println!("Test..");
+            let start = Instant::now();
+            let res = pool();
+            serialize(&res).unwrap();
+            println!("> RainbowTable Password Total: {}", NB_PASSWORD * NB_NODE);
+            println!("{} taille du tableau.", res.len());
+            // Bordel ici 
+            let end = Instant::now();
+            let duration = end - start;
+            println!("      time: {:?}", duration);*/
+            let start = Instant::now();
+            create_table();
+            let end = Instant::now();
+            let duration = end - start;
+            println!("      time: {:?}", duration)
         }
     }
 }
@@ -92,13 +106,15 @@ fn create_table() {
     println!("> Passwords: {} Nodes: {}", NB_PASSWORD, NB_NODE);
     println!("> RainbowTable Password Total: {}", NB_PASSWORD * NB_NODE);
     println!("> Language Password Total: {}", (SIGMA_SIZE as u64).pow(SIZE as u32));
-
-    if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE)) {
+    /*if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE)) {
         println!("RainbowTable already exist !");
     }
     else {
         println!("Create RainbowTable...");
         let rainbow_table: Vec<Node> = generate_table();
         serialize(&rainbow_table).unwrap();
-    }
+    }*/
+    println!("Create RainbowTable...");
+    let rainbow_table: Vec<Node> = generate_table();
+    serialize(&rainbow_table).unwrap();
 }

@@ -10,15 +10,25 @@ pub fn execution(rainbow_table: &mut Vec<Node>, flag: &str) -> bool {
 
     let mut position_flag;
 
+    let mut tmp: [u8; 32];
+    
     let hash_flag = sha3(flag);
-    let mut reduce = reduction(hash_flag, NONCE);
+    let mut reduce: String = String::from("");
 
     for i in 0..NB_NODE {
 
         if DEBUG { println!("{}","\n> Attack Node.. ".yellow()); }
+
+
         for j in NB_NODE-(i+1)..NB_NODE {
-            
-            let tmp = sha3(&reduce.clone());
+
+            if j == NB_NODE-(i+1) {
+                tmp = hash_flag;
+            }
+            else {
+                tmp = sha3(&reduce.clone());
+            }
+        
             reduce = reduction(tmp, j+NONCE);
             
             if DEBUG {
@@ -30,6 +40,7 @@ pub fn execution(rainbow_table: &mut Vec<Node>, flag: &str) -> bool {
                 }
             }
         }
+
         if DEBUG { println!("search {}", reduce); }
 
         position_flag = compare_end(rainbow_table, reduce.clone());

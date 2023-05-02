@@ -54,8 +54,8 @@ pub fn reduce_xor_mod(hash: [u8; 32], nonce: u32) -> String {
 
 pub fn reduce_xor(hash: [u8; 32], nonce: u32) -> String {
     let mut reduce: [u8; 32] = [0; 32];
-
-    for index in 0..32 {
+    let size = constants::SIZE as usize;
+    for index in 0..size {
         reduce[index] = hash[index] ^ nonce as u8;
     }
 

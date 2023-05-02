@@ -4,5 +4,6 @@ pub mod sha3;
 pub mod reduction;
 pub mod rainbow_table;
 pub mod constants;
+pub mod para;
 pub mod test;
 pub mod file;
