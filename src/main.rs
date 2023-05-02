@@ -1,8 +1,8 @@
-use rainbow_table_attack::attack;
-use rainbow_table_attack::performance;
-use rainbow_table_attack::rainbow_table::*;
-use rainbow_table_attack::test::*;
-use rainbow_table_attack::constants::*;
+use rainbow_table::attack;
+use rainbow_table::performance;
+use rainbow_table::rainbow_table::*;
+use rainbow_table::test::*;
+use rainbow_table::constants::*;
 use std::env;
 
 fn main() {
@@ -13,7 +13,7 @@ fn main() {
             "attack" => {
                 let mut rainbow_table: Vec<Node> = deserialize().unwrap();
 
-                attack::execution(&mut rainbow_table);
+                attack::execution(&mut rainbow_table,"aa");
             }
             "perf" => { 
                 println!("Performance...");

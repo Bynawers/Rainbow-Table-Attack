@@ -8,6 +8,7 @@ const NB_PASSWORD_TOTAL: u64 = (SIGMA_SIZE as u64).pow(SIZE as u32);
 
 pub fn test(rainbow_table: &Vec<rainbow_table::Node>) {
 
+    println!("{:?}",rainbow_table);
     let mut all_passw = Vec::<String>::new();
 
     for elt in rainbow_table {
@@ -16,11 +17,12 @@ pub fn test(rainbow_table: &Vec<rainbow_table::Node>) {
         if !contains(&red,&all_passw) {
             all_passw.push(String::from(red.clone()));
         }
+        print!("start : {}",red);
 
         for i in 1..NB_NODE {
             let hash = sha3(&red.clone());
 
-            red = reduction::reduce_xor(hash, i+NONCE);
+            red = reduction::reduction(hash, i+NONCE);
             
             if !contains(&red,&all_passw) {
                 all_passw.push(String::from(red.clone()));
@@ -30,7 +32,7 @@ pub fn test(rainbow_table: &Vec<rainbow_table::Node>) {
                 //println!("étape intermédiaire de la ligne : {}",red);
             }
         }
-        //println!("  end {}",red);
+        println!("  end {}",red);
     }
     //println!("{:?}",all_passw);
     //test2();
@@ -46,7 +48,7 @@ fn test2() {
     for i in 1..NB_NODE {
         let hash = sha3(&red);
         //affiche_hash(hash);
-        red = reduction::reduce_xor(hash, i+NONCE);
+        red = reduction::reduction(hash, i+NONCE);
 
         if i != NB_NODE -1 {
             println!("étape intermédiaire de la ligne : {}",red);

@@ -33,25 +33,21 @@ pub fn generate_table() -> Vec<Node> {
     for i in 0..NB_PASSWORD {
         for j in 0..NB_NODE {
             if j == 0 { 
-                reduce = reduction::reduce_xor(hash,j+NONCE);
+                reduce = reduction::reduction(hash,j+NONCE);
                 while contains(reduce.to_string(),&mut starting_items) {
                     reduce = generate(SIZE as usize,CHARSET);
                 }
-                println!("  start : {}",reduce);
                 node.start = reduce.to_string();
                 starting_items.push(reduce.to_string());
             } 
             else if j+1 == NB_NODE {
                 hash = sha3(&reduce);
-                reduce = reduction::reduce_xor(hash,j+NONCE);
-                println!("  end : {}",reduce);
+                reduce = reduction::reduction(hash,j+NONCE);
                 node.end = String::from(reduce.to_string());
             } 
             else {
                 hash = sha3(&reduce);
-                reduce = reduction::reduce_xor(hash,j+NONCE);
-                //print!("valeur de j : {}    ",j);
-                println!("étape intermédiaire : {}",reduce);
+                reduce = reduction::reduction(hash,j+NONCE);
             }
         }
         rainbow_table.push(node.clone());

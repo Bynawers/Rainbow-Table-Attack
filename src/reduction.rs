@@ -1,14 +1,22 @@
 use crate::constants;
 
-pub fn reduce_xor(hash: [u8; 32], nonce: u32) -> String {
+pub fn reduction(hash: [u8; 32], nonce: u32) -> String {
     let mut reduce: [u8; 32] = [0; 32];
 
-    for index in 0..32 {
-        reduce[index] = hash[index] ^ nonce as u8;
+    for index in 0..constants::SIZE {
+        reduce[index as usize] = hash[index as usize] ^ nonce as u8;
     }
 
     let password = to_password(&reduce);
     password
+    //let mut x = hash.clone();
+    //let size = constants::SIZE as usize;
+    //for i in 0..size {
+    //    x[i] = x[i + 4 ] ^ nonce as u8; // mélanger avec le nonce
+    //    x[i] = x[i] ^ x[31-i]; // appliquer une fonction non linéaire
+    //}
+    //let password = to_password(&x);
+    //password
 }
 
 pub fn reduce_mod(hash: [u8; 32], nonce: u32) -> String {

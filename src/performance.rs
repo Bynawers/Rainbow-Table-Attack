@@ -39,7 +39,7 @@ pub fn perf_reduction(nb_node: u32, type_reduction: Reduction) -> Result<Perform
     for i in 0..nb_node {
         match type_reduction {
             Reduction::Xor => {
-                reduce = reduction::reduce_xor(hash.as_slice().try_into().unwrap(), i+constants::NONCE);
+                reduce = reduction::reduction(hash.as_slice().try_into().unwrap(), i+constants::NONCE);
             },
             Reduction::Modulo => {
                 reduce = reduction::reduce_mod(hash.as_slice().try_into().unwrap(), i+constants::NONCE);
