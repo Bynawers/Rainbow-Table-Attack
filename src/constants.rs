@@ -1,6 +1,6 @@
 // Attack
 pub const GENERATOR_RAINBOW_TABLE: &str = "Crypto";
-pub const FLAG: &str = "aaa";
+pub const FLAG: &str = "aac";
 
 // Create RainbowTable
 pub const NONCE: u32 = 248820715;

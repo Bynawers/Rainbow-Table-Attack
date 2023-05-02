@@ -33,10 +33,10 @@ pub fn execution(rainbow_table: &mut Vec<Node>, flag: &str) -> bool {
             
             if DEBUG {
                 if j+1 == NB_NODE {
-                    print!("{} (R{}) ", reduce, j);
+                    print!("{} ", reduce);
                 }
                 else {
-                    print!("{} (R{}) => ", reduce, j);
+                    print!("{} => ", reduce);
                 }
             }
         }
@@ -85,20 +85,26 @@ fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u3
         println!("Position {} : ( first : {}, end: {} )", position_flag, rainbow_table[position_flag as usize].start, rainbow_table[position_flag as usize].end);
     }
 
-    let mut reduce = rainbow_table[position_flag as usize].start.clone();
-    let mut hash = sha3(&reduce);
+    let mut tmp: [u8; 32];
+    let mut reduce: String = String::from("");
 
     for i in 0..NB_NODE+1 {
 
+        if i == 0 {
+            tmp = sha3(&rainbow_table[(position_flag)as usize].start);
+        }
+        else {
+            tmp = sha3(&reduce.clone());
+        }
+
         if DEBUG { print!("{} => ", reduce); }
 
-        if hash == hash_flag {
+        if tmp == hash_flag {
             println!("{}", "FLAG found !".green());
             return true;
         }
 
-        reduce = reduction(hash, i+NONCE);
-        hash = sha3(&reduce);
+        reduce = reduction(tmp, i+NONCE);
     }
     if DEBUG { println!("{}", "FLAG not found".red()); }
     return false;
