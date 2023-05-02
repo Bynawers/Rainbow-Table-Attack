@@ -15,7 +15,7 @@ pub fn execution(rainbow_table: &mut Vec<Node>, flag: &str) -> bool {
     let hash_flag = sha3(flag);
     let mut reduce: String = String::from(flag);
 
-    println!("On chercher : {}",flag.yellow());
+    println!("On cherche : {}",flag.yellow());
 
     for i in 0..NB_NODE {
 
@@ -44,13 +44,14 @@ pub fn execution(rainbow_table: &mut Vec<Node>, flag: &str) -> bool {
             reduce = reduction(tmp, j+NONCE);
             
         }
-        print!("{}  ", reduce.red());
+        if DEBUG { print!("{}  ", reduce.red()); }
 
         if DEBUG { println!("search {}", reduce); }
 
         position_flag = compare_end(rainbow_table, reduce.clone());
         if position_flag != NB_PASSWORD {
             if reverse(rainbow_table, hash_flag, position_flag) {
+            println!("{} == {} ce truc est {}",reduce,rainbow_table[position_flag as usize].end,reduce==rainbow_table[position_flag as usize].end); 
                 return true;
             }
             else {
@@ -93,7 +94,9 @@ fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u3
     let mut tmp: [u8; 32];
     let mut reduce: String = String::from("");
 
-    for i in 0..NB_NODE+1 {
+    let mut trouve = false;
+
+    for i in 0..NB_NODE {
 
         if i == 0 {
             tmp = sha3(&rainbow_table[(position_flag)as usize].start);
@@ -111,8 +114,8 @@ fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u3
 
         reduce = reduction(tmp, i+1+NONCE);
     }
-    if DEBUG { println!("{}", "FLAG not found".red()); }
-    return false;
+    if DEBUG && !trouve { println!("{}", "FLAG not found".red()); }
+    return trouve;
 }
 
 pub fn print_hash(tab: [u8;32]) {

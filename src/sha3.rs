@@ -21,7 +21,7 @@ fn padding(password : &str) -> u64 {
     }
     padding64 <<= 3;
     padding64 |= 0b11; // 01 c'est le domaine pour tous les SHA-3 et le derniers 1 et le premier 1 du bourage.
-    padding64 <<= ((64-passwordlen)-3);
+    padding64 <<= (64-passwordlen)-3;
     //println!("{}",format!("{:b}",padding64).len());
     padding64
 }
