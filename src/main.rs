@@ -93,6 +93,7 @@ fn main() {
             let end = Instant::now();
             let duration = end - start;
             println!("      time: {:?}", duration);*/
+            
             let start = Instant::now();
             create_table();
             let end = Instant::now();
