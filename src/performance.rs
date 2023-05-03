@@ -74,8 +74,8 @@ pub fn perf_attack() -> Performance {
     let start = Instant::now();
 
     for password in 100..(10 as u64).pow(SIZE as u32) {
-        
-        if attack::execution(&mut rainbow_table, &password.to_string()) {
+        let hash = sha3(&password.to_string());
+        if attack::execution(&mut rainbow_table, hash) {
             success += 1;
         }
         else {
@@ -140,7 +140,7 @@ pub fn perf_para_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
     let end = Instant::now();
     let duration = end - start;
 
-    return Performance { type_perf: Type::RainbowTable, percent: Some(all_passw.len() as f32 / NB_PASSWORD_TOTAL as f32 *100.0) ,collision: None, time: duration };
+    return Performance { type_perf: Type::RainbowTable, percent: Some((all_passw.len()-1 ) as f32 / NB_PASSWORD_TOTAL as f32 *100.0) ,collision: None, time: duration };
 }
 
 fn para_rainbow_test(startpassword : u32, endpassword: u32, rainbow_table: &Vec<Node>) -> Vec<String> {

@@ -4,7 +4,7 @@ use rainbow_table::{
     rainbow_table::*,
     constants::*,
     file::*,
-    para::pool
+    para::pool, sha3::sha3
 };
 use std::time::{Instant};
 use colored::*;
@@ -48,8 +48,8 @@ fn main() {
                 create_table();
             }
             let mut rainbow_table: Vec<Node> = deserialize().unwrap();
-
-            attack::execution(&mut rainbow_table, FLAG); 
+            let hash = sha3(FLAG);
+            attack::execution(&mut rainbow_table, hash); 
         }
         Command::Performance { type_perf } => {
             println!("Performance...");

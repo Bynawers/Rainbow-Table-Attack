@@ -4,6 +4,19 @@ pub fn reduction(hash: [u8; 32], nonce: u32) -> String {
     return reduce_xor(hash, nonce);
 }
 
+pub fn reduction_test(hash: [u8; 32], nonce: u32) -> String {
+    return reduce_xor_test(hash, nonce);
+}
+
+fn reduce_xor_test(hash: [u8; 32], nonce: u32) -> String {
+    let mut reduce: [u8; 32] = [0; 32];
+    for index in 0..2 {
+        reduce[index] = hash[index] ^ nonce as u8;
+    }
+    let password = to_password_test(&reduce);
+    password
+}
+
 fn reduce_xor_2(hash: [u8; 32], nonce: u32) -> String {
     let mut x = hash.clone();
     let size = constants::SIZE as usize;
@@ -116,6 +129,15 @@ fn to_password(bytes: &[u8; 32]) -> String {
     let mut password: String = String::from("");
 
     for i in 0..constants::SIZE {
+        password.push(constants::SIGMA[((bytes[i as usize]) % constants::SIGMA_SIZE) as usize]);
+    }
+    password
+}
+
+fn to_password_test(bytes: &[u8; 32]) -> String {
+    let mut password: String = String::from("");
+
+    for i in 0..2 {
         password.push(constants::SIGMA[((bytes[i as usize]) % constants::SIGMA_SIZE) as usize]);
     }
     password

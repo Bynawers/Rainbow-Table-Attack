@@ -52,7 +52,9 @@ mod tests {
         let nodes: Vec<Node> = from_str(&contents).unwrap();
         let rainbow_table: Result<Vec<Node>> = Ok(nodes);
         
-        let res = attack::execution_test(&mut rainbow_table.unwrap(), "ab");
+        let hash_ab = sha3("ab");
+
+        let res = attack::execution_test(&mut rainbow_table.unwrap(), hash_ab);
         assert_eq!(res,true)
     }
     
