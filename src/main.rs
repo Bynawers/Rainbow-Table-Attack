@@ -92,12 +92,12 @@ fn main() {
             let end = Instant::now();
             let duration = end - start;
             println!("      time: {} seconds.", duration.as_secs_f32().to_string().purple());
-            /*  Bordel ici 
+            /*  Bordel ici */
             let start = Instant::now();
             create_table();
             let end = Instant::now();
             let duration = end - start;
-            println!("      time: {:?}", duration)*/
+            println!("      time: {:?}", duration)
         }
     }
 }

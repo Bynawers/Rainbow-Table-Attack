@@ -36,6 +36,8 @@ pub enum Error {
 
 const NB_PASSWORD_TOTAL: u64 = (SIGMA_SIZE as u64).pow(SIZE as u32);
 
+const TAILLE: usize = 36_i32.pow(SIZE as u32) as usize;
+
 pub fn perf_reduction() -> Performance {
 
     let mut password_reduce: Vec<String> = Vec::new();
@@ -87,35 +89,37 @@ pub fn perf_attack() -> Performance {
     return Performance { type_perf: Type::Attack, percent: Some((success / (success + fail)) as f32), collision: None, time: duration };
 }
 
-pub fn perf_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
-
-    let mut all_passw = Vec::<String>::new();
-
-    let start = Instant::now();
-
-    for elt in rainbow_table {
-        let mut red = elt.start.clone();
-
-        if !contains(&red,&all_passw) {
-            all_passw.push(red.clone());
-        }
-
-        for i in 1..NB_NODE {
-            let hash = sha3(&red);
-
-            red = reduction(hash, i+NONCE);
-            
-            if !contains(&red, &all_passw) {
-                all_passw.push(red.clone());
-            }
-        }
-    }
-
-    let end = Instant::now();
-    let duration = end - start;
-
-    return Performance { type_perf: Type::RainbowTable, percent: Some(all_passw.len() as f32 / NB_PASSWORD_TOTAL as f32 *100.0) ,collision: None, time: duration };
-}
+//pub fn perf_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
+//
+//    let mut all_passw: [&str;TAILLE] = ["0";TAILLE];
+//    let mut last_index = 0;
+//    let start = Instant::now();
+//
+//    for elt in rainbow_table {
+//        let mut red = elt.start.clone();
+//
+//        if !contains(&red,&all_passw) {
+//            all_passw[last_index] = &red;
+//            last_index = last_index+1;
+//        }
+//
+//        for i in 1..NB_NODE {
+//            let hash = sha3(&red);
+//
+//            red = reduction(hash, i+NONCE);
+//            
+//            if !contains(&red,&all_passw) {
+//                all_passw[last_index] = &red;
+//                last_index = last_index+1;
+//            }
+//        }
+//    }
+//
+//    let end = Instant::now();
+//    let duration = end - start;
+//
+//    return Performance { type_perf: Type::RainbowTable, percent: Some(all_passw.len() as f32 / NB_PASSWORD_TOTAL as f32 *100.0) ,collision: None, time: duration };
+//}
 
 pub fn perf_para_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
     let start = Instant::now();
@@ -141,12 +145,14 @@ pub fn perf_para_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
 
 fn para_rainbow_test(startpassword : u32, endpassword: u32, rainbow_table: &Vec<Node>) -> Vec<String> {
     //println!("{} start ,{} end ", startpassword ,endpassword);
-    let mut all_passw: Vec<String> = Vec::<String>::new();
+    let mut all_passw: Vec<String> = vec![String::from("µ");TAILLE];
+    let mut last_index = 0;
     for i in startpassword..endpassword {
         let mut red = rainbow_table[i as usize].start.clone();
         
         if !contains(&red,&all_passw) {
-            all_passw.push(red.clone());
+            all_passw[last_index] = red.clone();
+            last_index = last_index +1;
         }
 
         for j in 1..NB_NODE {
@@ -154,8 +160,9 @@ fn para_rainbow_test(startpassword : u32, endpassword: u32, rainbow_table: &Vec<
 
             red = reduction(hash, j+NONCE);
             
-            if !contains(&red, &all_passw) {
-                all_passw.push(red.clone());
+            if !contains(&red,&all_passw) {
+                all_passw[last_index] = red.clone();
+                last_index = last_index +1;
             }
         }
     }
@@ -179,7 +186,7 @@ fn collision<T: PartialEq>(vec: &[T]) -> u32 {
 
     count
 }
-fn contains(truc:&str, vector:&Vec<String>) -> bool {
+fn contains(truc:&str, vector: &Vec<String>) -> bool {
     for elt in vector {
         if truc == elt {
             return true;
