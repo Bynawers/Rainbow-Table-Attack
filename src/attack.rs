@@ -1,24 +1,21 @@
 use crate::sha3::sha3;
 use crate::reduction::reduction;
-
 use crate::constants::*;
 use crate::rainbow_table::Node;
 
 use colored::*;
 
-pub fn execution(rainbow_table: &mut Vec<Node>, flag: &str) -> bool {
+pub fn execution(rainbow_table: &mut Vec<Node>, flag: &str) -> Option<String> {
 
     let mut position_flag;
 
-    let mut tmp: [u8; 32];
-    
-    let hash_flag = sha3(flag);
     let mut reduce: String = String::from("");
+    let mut tmp: [u8; 32];
+    let hash_flag = sha3(flag);
 
     for i in 0..NB_NODE {
 
         if DEBUG { println!("{}","\n> Attack Node.. ".yellow()); }
-
 
         for j in NB_NODE-(i+1)..NB_NODE {
 
@@ -33,10 +30,10 @@ pub fn execution(rainbow_table: &mut Vec<Node>, flag: &str) -> bool {
             
             if DEBUG {
                 if j+1 == NB_NODE {
-                    print!("{} ", reduce);
+                    print!("{} R({})", reduce, j);
                 }
                 else {
-                    print!("{} => ", reduce);
+                    print!("{} R({}) => ", reduce, j);
                 }
             }
         }
@@ -44,12 +41,10 @@ pub fn execution(rainbow_table: &mut Vec<Node>, flag: &str) -> bool {
         if DEBUG { println!("search {}", reduce); }
 
         position_flag = compare_end(rainbow_table, reduce.clone());
-        if position_flag > 0 {
-            if reverse(rainbow_table, hash_flag, position_flag) {
-                return true;
-            }
-            else {
-                continue;
+        if position_flag != NB_PASSWORD {
+            match reverse(rainbow_table, hash_flag, position_flag) {
+                None => continue,
+                Some(password) => { return Some(password); }
             }
             
         } 
@@ -57,8 +52,7 @@ pub fn execution(rainbow_table: &mut Vec<Node>, flag: &str) -> bool {
             if DEBUG { println!("{}", "not find !".red()); }
         }
     }
-    println!("{}", "FLAG not found".red());
-    return false;
+    return None;
 }
 
 /*
@@ -75,10 +69,10 @@ fn compare_end(rainbow_table: &mut Vec<Node>, value: String) -> u32 {
             return i;
         }
     }
-    return 0;
+    return NB_PASSWORD;
 }
 
-fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u32) -> bool {
+fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u32) -> Option<String> {
     
     if DEBUG {
         println!("{}", "> Recrate node..".yellow());
@@ -100,18 +94,12 @@ fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u3
         if DEBUG { print!("{} => ", reduce); }
 
         if tmp == hash_flag {
-            println!("{}", "FLAG found !".green());
-            return true;
+            return Some(reduce);
         }
 
-        reduce = reduction(tmp, i+NONCE);
+        reduce = reduction(tmp, i+NONCE+1);
     }
     if DEBUG { println!("{}", "FLAG not found".red()); }
-    return false;
-}
 
-pub fn print_hash(tab: [u8;32]) {
-    for elt in tab {
-        print!("{:0x}",elt);
-    }
+    return None;
 }

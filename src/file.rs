@@ -51,8 +51,28 @@ pub fn file_exists_in_directory(directory: &str, filename: &str) -> bool {
     false
 }
 
-pub fn delete_file_in_directory(directory: &str, filename: &str) -> std::io::Result<()> {
-    let path = std::path::Path::new(directory).join(filename);
-    fs::remove_file(path)?;
-    Ok(())
+pub fn delete_file_in_directory(directory: &str, filename: &str) {
+    if file_exists_in_directory(directory, filename) {
+        let path = std::path::Path::new(directory).join(filename);
+        fs::remove_file(path).unwrap();
+    }
+}
+
+pub fn delete_all_file_in_directory(directory: &str) {
+    if let Ok(entries) = fs::read_dir(directory) {
+        for entry in entries {
+            if let Ok(entry) = entry {
+                let path = entry.path();
+                if path.is_file() {
+                    if let Err(e) = fs::remove_file(path) {
+                        println!("Error deleting file: {:?}", e);
+                    }
+                }
+            } else if let Err(e) = entry {
+                println!("Error reading directory entry: {:?}", e);
+            }
+        }
+    } else {
+        println!("Error reading directory: {}", directory);
+    }
 }
