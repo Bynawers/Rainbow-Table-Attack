@@ -37,8 +37,7 @@ pub fn pool() -> Vec<Node> {
     });
     table
 }
-//pub const CHARSET: &str = "abcdefghijklmnopqrstuvwxyz0123456789";
-pub const CHARSET: &str = "abcdefghijklmnopqrstuvwxyz";
+//pub const CHARSET: &str = "abcdefghijklmnopqrstuvwxyz";
 
 // Création d'une portion de la Rainbow_table
 fn generate_table(
@@ -46,10 +45,11 @@ fn generate_table(
     endpassword : u32, 
     starting_items_shared : Arc<Mutex<Vec<String>>>
 ) -> Vec<Node> {
+    let charset: String = SIGMA.iter().collect::<String>();
     //println!("{} start ,{} end ", startpassword ,endpassword);
     let mut rainbow_table : Vec<Node> = vec![];
     let mut hash = sha3(GENERATOR_RAINBOW_TABLE);
-    let mut reduce = generate(SIZE as usize,CHARSET);
+    let mut reduce = generate(SIZE as usize,&charset);
     //let mut starting_items = Vec::<String>::new();
     let mut node = Node { 
         start: String::from(""), 
@@ -66,7 +66,7 @@ fn generate_table(
                 reduce = reduction(hash,j+NONCE);
 
                 while contains(reduce.to_string(),&mut starting_items) {
-                    reduce = generate(SIZE as usize,CHARSET);
+                    reduce = generate(SIZE as usize,&charset);
                 }
                 node.start = reduce.to_string();
                 starting_items.push(reduce.to_string());
