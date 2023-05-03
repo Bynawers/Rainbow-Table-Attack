@@ -63,7 +63,6 @@ pub fn execution(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32]) -> bool {
             // on appelle ici la fonction reverse, qui recréé la chaine en repartant du premier élément de la chaine
             // cette foncion renvoie true si le hashé que l'on recherche est dans la chaine et false sinon
             if reverse(rainbow_table, hash_flag, position_flag) {
-            println!("{} == {} ce truc est {}",reduce,rainbow_table[position_flag as usize].end,reduce==rainbow_table[position_flag as usize].end); 
                 return true;
             }
             else {
@@ -122,7 +121,7 @@ fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u3
         if DEBUG { print!("{} (R{}) => ", reduce,i); }
 
         if tmp == hash_flag {
-            println!("{}", "FLAG found !".green());
+            println!("{} le mot de passe recherché est :  {}", "FLAG found !".green(),reduce.green());
             return true;
         }
 
