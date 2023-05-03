@@ -133,11 +133,3 @@ fn create_table() {
         serialize(&rainbow_table).unwrap();
     }
 }
-
-
-
-/* 
-TODO LIST
-
-Test Casque dans la génération de la table
-*/
