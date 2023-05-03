@@ -1,12 +1,18 @@
 use std::time::{Instant, Duration};
 use structopt::StructOpt;
 
-use crate::sha3::sha3;
-use crate::reduction::reduction;
-use crate::constants::*;
-use crate::rainbow_table::*;
-use crate::attack;
-use crate::file::*;
+use crate::{
+    sha3::sha3,
+    reduction::reduction,
+    constants::*,
+    rainbow_table::Node,
+    attack,
+    file::deserialize
+};
+
+use rayon::prelude::*;
+use num_cpus;
+use std::sync::{Arc, Mutex};
 
 #[derive(Debug)] 
 pub struct Performance {
@@ -91,16 +97,16 @@ pub fn perf_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
         let mut red = elt.start.clone();
 
         if !contains(&red,&all_passw) {
-            all_passw.push(String::from(red.clone()));
+            all_passw.push(red.clone());
         }
 
         for i in 1..NB_NODE {
-            let hash = sha3(&red.clone());
+            let hash = sha3(&red);
 
             red = reduction(hash, i+NONCE);
             
             if !contains(&red, &all_passw) {
-                all_passw.push(String::from(red.clone()));
+                all_passw.push(red.clone());
             }
         }
     }
@@ -109,6 +115,51 @@ pub fn perf_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
     let duration = end - start;
 
     return Performance { type_perf: Type::RainbowTable, percent: Some(all_passw.len() as f32 / NB_PASSWORD_TOTAL as f32 *100.0) ,collision: None, time: duration };
+}
+
+pub fn perf_para_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
+    let start = Instant::now();
+    
+    let num_threads = num_cpus::get();
+    let pool = rayon::ThreadPoolBuilder::new().num_threads(num_threads).build().unwrap();
+    let slice = NB_PASSWORD / num_threads as u32;
+    
+    let all_passw : Vec<String> = pool.install(|| {
+        (0..num_threads).into_par_iter()
+            .map(|i| {
+                let start = i as u32 * slice;
+                let end = if i == num_threads - 1 { NB_PASSWORD } else { start + slice };
+                para_rainbow_test(start,end,rainbow_table)
+            }).flatten().collect()
+    });
+    let all_passw : Vec<String> = all_passw.into_iter().collect::<std::collections::HashSet<_>>().into_iter().collect();
+    let end = Instant::now();
+    let duration = end - start;
+
+    return Performance { type_perf: Type::RainbowTable, percent: Some(all_passw.len() as f32 / NB_PASSWORD_TOTAL as f32 *100.0) ,collision: None, time: duration };
+}
+
+fn para_rainbow_test(startpassword : u32, endpassword: u32, rainbow_table: &Vec<Node>) -> Vec<String> {
+    //println!("{} start ,{} end ", startpassword ,endpassword);
+    let mut all_passw: Vec<String> = Vec::<String>::new();
+    for i in startpassword..endpassword {
+        let mut red = rainbow_table[i as usize].start.clone();
+        
+        if !contains(&red,&all_passw) {
+            all_passw.push(red.clone());
+        }
+
+        for j in 1..NB_NODE {
+            let hash = sha3(&red);
+
+            red = reduction(hash, j+NONCE);
+            
+            if !contains(&red, &all_passw) {
+                all_passw.push(red.clone());
+            }
+        }
+    }
+    all_passw
 }
 
 

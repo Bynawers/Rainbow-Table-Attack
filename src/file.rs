@@ -1,11 +1,10 @@
-use std::fs::File;
-use std::fs;
+use std::fs::{File, read_dir, remove_file};
 use std::io::{Write, Result, Read};
-use serde_json;
+use serde_json::{to_string,from_str};
 
 use crate::rainbow_table::Node;
 
-use crate::constants::*;
+use crate::constants::{SIZE, NB_PASSWORD, NB_NODE};
 
 pub fn serialize<T>(data: &Vec<T>) -> Result<()>
 where
@@ -13,7 +12,7 @@ where
 {
     println!("Save file...");
 
-    let json_string = serde_json::to_string(data)?;
+    let json_string = to_string(data)?;
 
     let mut file = File::create(&format!("./data/RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE))?;
 
@@ -31,13 +30,13 @@ pub fn deserialize() -> Result<Vec<Node>> {
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
 
-    let nodes: Vec<Node> = serde_json::from_str(&contents)?;
+    let nodes: Vec<Node> = from_str(&contents)?;
 
     Ok(nodes)
 }
 
 pub fn file_exists_in_directory(directory: &str, filename: &str) -> bool {
-    if let Ok(files) = fs::read_dir(directory) {
+    if let Ok(files) = read_dir(directory) {
         for file in files {
             if let Ok(file) = file {
                 if let Some(name) = file.file_name().to_str() {
@@ -53,6 +52,6 @@ pub fn file_exists_in_directory(directory: &str, filename: &str) -> bool {
 
 pub fn delete_file_in_directory(directory: &str, filename: &str) -> std::io::Result<()> {
     let path = std::path::Path::new(directory).join(filename);
-    fs::remove_file(path)?;
+    remove_file(path)?;
     Ok(())
 }

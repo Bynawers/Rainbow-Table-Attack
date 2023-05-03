@@ -1,12 +1,14 @@
-use rainbow_table_attack::attack;
-use rainbow_table_attack::performance::*;
-use rainbow_table_attack::rainbow_table::*;
-use rainbow_table_attack::constants::*;
-use rainbow_table_attack::file::*;
-use rainbow_table_attack::para::pool;
-use std::time::{Instant, Duration};
-
-
+use rainbow_table_attack::{
+    rainbow_table::generate_table,
+    attack,
+    performance::*,
+    rainbow_table::*,
+    constants::*,
+    file::*,
+    para::pool
+};
+use std::time::{Instant};
+use colored::*;
 use structopt::StructOpt;
 
 #[derive(StructOpt)]
@@ -67,7 +69,7 @@ fn main() {
                         "table" => {
                             create_table();
                             let rainbow_table: Vec<Node> = deserialize().unwrap();
-                            performance = Some(perf_rainbow_table(&rainbow_table));
+                            performance = Some(perf_para_rainbow_table(&rainbow_table));
                         }
                         _ => performance = None
                     }
@@ -83,22 +85,20 @@ fn main() {
             }
         }
         Command::Test { } => {
-            /*println!("Test..");
+            println!("Parallel Testing ..");
+            println!("> RainbowTable Password Total: {}", NB_PASSWORD * NB_NODE);
             let start = Instant::now();
             let res = pool();
             serialize(&res).unwrap();
-            println!("> RainbowTable Password Total: {}", NB_PASSWORD * NB_NODE);
-            println!("{} taille du tableau.", res.len());
-            // Bordel ici 
             let end = Instant::now();
             let duration = end - start;
-            println!("      time: {:?}", duration);*/
-            
+            println!("      time: {} seconds.", duration.as_secs_f32().to_string().purple());
+            /*  Bordel ici 
             let start = Instant::now();
             create_table();
             let end = Instant::now();
             let duration = end - start;
-            println!("      time: {:?}", duration)
+            println!("      time: {:?}", duration)*/
         }
     }
 }
@@ -116,6 +116,6 @@ fn create_table() {
         serialize(&rainbow_table).unwrap();
     }*/
     println!("Create RainbowTable...");
-    let rainbow_table: Vec<Node> = generate_table();
+    let rainbow_table: Vec<Node> = pool();
     serialize(&rainbow_table).unwrap();
 }

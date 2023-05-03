@@ -5,11 +5,11 @@ pub const FLAG: &str = "aaa";
 // Create RainbowTable
 pub const NONCE: u32 = 248820715;
 
-pub const NB_PASSWORD: u32 = 800;
+pub const NB_PASSWORD: u32 = 480;
 pub const NB_NODE: u32 = 250;
 
 // Mot de Passe
-pub const SIZE: u8 = 2;
+pub const SIZE: u8 = 3;
 /*pub const SIGMA_SIZE: u8 = 26;
 pub const SIGMA: [char; SIGMA_SIZE as usize] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 */

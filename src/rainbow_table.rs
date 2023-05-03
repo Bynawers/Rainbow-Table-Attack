@@ -6,8 +6,8 @@ use crate::reduction::reduction;
 
 use crate::constants::*;
 
-//pub const CHARSET: &str = "abcdefghijklmnopqrstuvwxyz0123456789";
-pub const CHARSET: &str = "abcdefghijklmnopqrstuvwxyz";
+pub const CHARSET: &str = "abcdefghijklmnopqrstuvwxyz0123456789";
+//pub const CHARSET: &str = "abcdefghijklmnopqrstuvwxyz";
 
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -20,6 +20,7 @@ pub fn generate_table() -> Vec<Node> {
 
     let mut rainbow_table : Vec<Node> = vec![];
     let mut hash = sha3(GENERATOR_RAINBOW_TABLE);
+    // pk le reduce
     let mut reduce = generate(SIZE as usize,CHARSET);
     let mut starting_items = Vec::<String>::new();
 
@@ -28,15 +29,12 @@ pub fn generate_table() -> Vec<Node> {
         end: String::from("") 
     };
 
-    for i in 0..NB_PASSWORD {
-        println!("{}",i);
+    for _ in 0..NB_PASSWORD {
         for j in 0..NB_NODE {
             if j == 0 { 
                 reduce = reduction(hash,j+NONCE);
-
                 while contains(reduce.to_string(),&mut starting_items) {
                     reduce = generate(SIZE as usize,CHARSET);
-                    println!("{}",i);
                 }
                 node.start = reduce.to_string();
                 starting_items.push(reduce.to_string());

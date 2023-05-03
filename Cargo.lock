@@ -243,6 +243,7 @@ dependencies = [
 name = "rainbow_table_attack"
 version = "0.1.0"
 dependencies = [
+ "ansi_term",
  "colored",
  "num_cpus",
  "random-string",
