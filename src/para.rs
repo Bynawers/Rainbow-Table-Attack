@@ -37,7 +37,6 @@ pub fn pool() -> Vec<Node> {
     });
     table
 }
-//pub const CHARSET: &str = "abcdefghijklmnopqrstuvwxyz0123456789";
 pub const CHARSET: &str = "abcdefghijklmnopqrstuvwxyz0123456789";
 
 // Création d'une portion de la Rainbow_table
@@ -46,11 +45,9 @@ fn generate_table(
     endpassword : u32, 
     starting_items_shared : Arc<Mutex<Vec<String>>>
 ) -> Vec<Node> {
-    //println!("{} start ,{} end ", startpassword ,endpassword);
     let mut rainbow_table : Vec<Node> = vec![];
     let mut hash = sha3(GENERATOR_RAINBOW_TABLE);
     let mut reduce = generate(SIZE as usize,CHARSET);
-    //let mut starting_items = Vec::<String>::new();
     let mut node = Node { 
         start: String::from(""), 
         end: String::from("") 
@@ -64,10 +61,12 @@ fn generate_table(
                 let mut starting_items = starting_items_shared.lock().unwrap();
 
                 reduce = reduction(hash,j+NONCE);
-
+                // Ici, on regarde si le mot de passe contenu dans reduce n'a pas déja été utilisé en début de chaine
+                // si il a déja été utilisé, on génère aléatoirement un nouveau mot de passe jusqu'a en trouver un pas encore utilisé en début de chaine
                 while contains(reduce.to_string(),&mut starting_items) {
                     reduce = generate(SIZE as usize,CHARSET);
                 }
+                // On défini le premier élément de la chaine avec le mot de passe obtenu à létape précédente
                 node.start = reduce.to_string();
                 starting_items.push(reduce.to_string());
                 
@@ -75,25 +74,28 @@ fn generate_table(
                 drop(starting_items);
 
             } 
+            //si on est dans la dernière étape d'une chaine, on effectue un hashage puis un reduce sur le mot de passe que l'on
+            // a actuellemnt, puis on défini la fin de chaine avec le mot de passe obtenu
             else if j+1 == NB_NODE {
                 hash = sha3(&reduce);
                 reduce = reduction(hash,j+NONCE);
                 node.end = String::from(reduce.to_string());
             } 
+            //on effectue un hashae puis un reduce sur le mot de passe que l'on a 
             else {
                 hash = sha3(&reduce);
                 reduce = reduction(hash,j+NONCE);
-                //print!("valeur de j : {}    ",j);
             }
         }
+        // une fois la chaine fini (premier et dernier élément de la chaine défini), on ajoute la node au vecteur contenant la
+        // rainbow table
         rainbow_table.push(node.clone());
     }
-    //println!("fin");
+   
     rainbow_table
-
-    //println!("{:?}",starting_items);
 }
 
+// cette fonction prend en argument un String et un vecteur de String et renvoie true si l'élément est dans le vecteur et false sinon
 fn contains(elt:String, tab: &mut Vec::<String>) -> bool {
     for mdp in tab {
         if mdp == &elt {
