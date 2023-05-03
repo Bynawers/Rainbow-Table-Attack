@@ -5,8 +5,8 @@ pub const FLAG: &str = "a2";
 // Create RainbowTable
 pub const NONCE: u32 = 248820715;
 
-pub const NB_PASSWORD: u32 = 101;
-pub const NB_NODE: u32 = 50;
+pub const NB_PASSWORD: u32 = 480;
+pub const NB_NODE: u32 = 250;
 
 // Mot de Passe
 pub const SIZE: u8 = 2;
