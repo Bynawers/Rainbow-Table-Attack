@@ -17,11 +17,20 @@ pub fn execution(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32]) -> bool {
 
     //println!("On cherche : {}",hash_flag.yellow());
 
+    /* Dans la boucle ci dessous, on va calculer reduce(hash) NB_NODES fois
+     exemple :    -première itération :   reduce = reduce(hash_flag)
+                    -deuxième itération :   reduce = reduce(hash(reduce(hash_flag)))
+                    etc... jusqu'a NB_NODES itération
+    Puis, à chaque itération, on compare le reduce avec toutes les fin de chaines de la rainbow table
+    Si on trouve une fin de chaine = reduce, cela veut dire que le hashé recherché est peut-être dans la chaine
+    On recalcule ensuite la chaine en repartant du première élément de la chaine, puis si on retombe sur le hashé recherché,
+    on a retrouvé le mot de passe recheché et on renvoie le reduce précédent le hashé que l'on a retrouvé dans la chaine
+*/
     for i in 0..NB_NODE {
 
         if DEBUG { println!("{}","\n> Attack Node.. ".yellow()); }
 
-
+        // dans cette boucle on caclcule NB_NODES-i+1 fois la fonction f = reduce(hash)
         for j in NB_NODE-(i+1)..NB_NODE {
 
             if j == NB_NODE-(i+1) {
@@ -47,8 +56,12 @@ pub fn execution(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32]) -> bool {
 
         if DEBUG { println!("search {}", reduce); }
 
+        //ici on appelle la fonction compare_end qui renvoie la position de la chaine où le dernier élément = reduce
+        // si aucune chaine ne correspond au reduce que l'on a, la fonction renvoie NB_PASSWORD (qui correspond a l'indice max + 1)
         position_flag = compare_end(rainbow_table, reduce.clone());
         if position_flag != NB_PASSWORD {
+            // on appelle ici la fonction reverse, qui recréé la chaine en repartant du premier élément de la chaine
+            // cette foncion renvoie true si le hashé que l'on recherche est dans la chaine et false sinon
             if reverse(rainbow_table, hash_flag, position_flag) {
             println!("{} == {} ce truc est {}",reduce,rainbow_table[position_flag as usize].end,reduce==rainbow_table[position_flag as usize].end); 
                 return true;
@@ -83,6 +96,8 @@ fn compare_end(rainbow_table: &mut Vec<Node>, value: String) -> u32 {
     return NB_PASSWORD;
 }
 
+//recréé la chaine à l'indice position_flag a partir du premier élément de la chaine et renvoie true si 
+// hash flag est dans la chaine
 fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u32) -> bool {
     
     if DEBUG {
@@ -122,6 +137,11 @@ pub fn print_hash(tab: [u8;32]) {
         print!("{:0x}",elt);
     }
 }
+
+/* les fonctions ci dessous sont identiques à celles qu'il y a au dessous à peu de choses près
+les fonctions ci dessous ne font pas appel aux constantes SIZE, et sont appelées uniquement dans le cadre
+des tests unitaires
+ */
 
 pub fn execution_test(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32]) -> bool {
 
