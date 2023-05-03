@@ -150,7 +150,7 @@ fn para_rainbow_test(startpassword : u32, endpassword: u32, rainbow_table: &Vec<
     for i in startpassword..endpassword {
         let mut red = rainbow_table[i as usize].start.clone();
         
-        if !contains(&red,&all_passw) {
+        if !contains2(&red,&all_passw,last_index) {
             all_passw[last_index] = red.clone();
             last_index = last_index +1;
         }
@@ -160,7 +160,7 @@ fn para_rainbow_test(startpassword : u32, endpassword: u32, rainbow_table: &Vec<
 
             red = reduction(hash, j+NONCE);
             
-            if !contains(&red,&all_passw) {
+            if !contains2(&red,&all_passw,last_index) {
                 all_passw[last_index] = red.clone();
                 last_index = last_index +1;
             }
@@ -186,9 +186,19 @@ fn collision<T: PartialEq>(vec: &[T]) -> u32 {
 
     count
 }
+
 fn contains(truc:&str, vector: &Vec<String>) -> bool {
     for elt in vector {
         if truc == elt {
+            return true;
+        }
+    }
+    return false;
+}
+
+fn contains2(truc:&str, vector: &Vec<String>,last_i: usize) -> bool {
+    for elt in 0..last_i {
+        if truc == vector[elt] {
             return true;
         }
     }
