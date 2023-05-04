@@ -1,4 +1,3 @@
-use rainbow_table_attack::reduction::reduction;
 use rainbow_table_attack::{
     sha3::sha3,
     attack,

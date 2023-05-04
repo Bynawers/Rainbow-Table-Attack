@@ -8,7 +8,7 @@ use crate::constants::{SIZE, NB_PASSWORD, NB_NODE};
 
 
 // Cette fonction prend en argument un vecteur (dans notre cas une rainbow table) et écrit dans un fichier .json le contenu 
-// de cette table en le nomant avec les constantes définies
+// de cette table en le nomant avec les constantes définies.
 pub fn serialize<T>(data: &Vec<T>) -> Result<()>
 where
     T: serde::Serialize,
@@ -26,8 +26,8 @@ where
     Ok(())
 }
 
-// cette fonction va chercher dans le dossier data le fichier .json correspondant aux constantes actuelles et récupère
-// son contenu puis le transforme en vecteur de node qui sera une rainbow table
+// Cette fonction va chercher dans le dossier data le fichier .json correspondant aux constantes actuelles et récupère
+// son contenu puis le transforme en vecteur de node qui sera une rainbow table.
 pub fn deserialize() -> Result<Vec<Node>> {
 
     let mut file = File::open(format!("./data/RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE))?;
@@ -41,7 +41,7 @@ pub fn deserialize() -> Result<Vec<Node>> {
 }
 
 
-// cette fonction renvoie true si un fichier portant le nom filename se trouve dans le dossier directory et false sinon
+// Cette fonction renvoie true si un fichier portant le nom filename se trouve dans le dossier directory et false sinon.
 pub fn file_exists_in_directory(directory: &str, filename: &str) -> bool {
     if let Ok(files) = read_dir(directory) {
         for file in files {
@@ -57,6 +57,7 @@ pub fn file_exists_in_directory(directory: &str, filename: &str) -> bool {
     false
 }
 
+// Cette fonction supprime le fichier filename dans le dossier directory.
 pub fn delete_file_in_directory(directory: &str, filename: &str) -> std::io::Result<()> {
     let path = std::path::Path::new(directory).join(filename);
     remove_file(path)?;

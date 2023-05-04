@@ -19,7 +19,7 @@ pub struct Node {
     pub end: String,
 }
 
-// Création de la rainbow_table avec de la parallélisation
+// Création de la rainbow_table avec de la parallélisation.
 pub fn pool() -> Vec<Node> {
     // On récupère le nombre de threads disponibles sur l'ordinateur.
     let num_threads = num_cpus::get();
@@ -31,7 +31,7 @@ pub fn pool() -> Vec<Node> {
         .unwrap()
         .with_key("eta", |state: &ProgressState, w: &mut dyn Write| write!(w, "{:.1}s", state.eta().as_secs_f64()).unwrap()));
     
-    // Création d'une Pool de threads via la bibliothèque rayon
+    // Création d'une Pool de threads via la bibliothèque rayon.
     let pool = rayon::ThreadPoolBuilder::new().num_threads(num_threads).build().unwrap();
     let slice = NB_PASSWORD / num_threads as u32;
     
@@ -57,7 +57,7 @@ pub fn pool() -> Vec<Node> {
     table
 }
 
-// Création d'une portion de la Rainbow_table
+// Création d'une portion de la Rainbow_table.
 fn generate_table(
     startpassword: u32,
     endpassword: u32, 
@@ -123,7 +123,7 @@ fn generate_table(
 
 }
 
-// cette fonction prend en argument un String et un vecteur de String et renvoie true si l'élément est dans le vecteur et false sinon.
+// Cette fonction prend en argument un String et un vecteur de String et renvoie true si l'élément est dans le vecteur et false sinon.
 fn contains(elt:String, tab: &mut Vec::<String>) -> bool {
     for mdp in tab {
         if mdp == &elt {

@@ -8,8 +8,8 @@ mod tests {
     use crate::attack;
     use crate::constants;
 
-    // les tests unitaires sur sha3 vérifient que le résultat obtenu avec notre fonction correspond bien au résultat que l'on
-    // est cencé obtenir
+    // Les tests unitaires sur sha3 vérifient que le résultat obtenu avec notre fonction correspond bien au résultat que l'on
+    // est cencé obtenir.
     #[test]
     fn test_sha3_1() {
         let hash_abc:[u8;32] = [58,152,93,167,79,226,37,178,4,92,23,45,107,211,144,189,133,95,8,110,62,157,82,91,70,191,226,69,17,67,21,50];
@@ -24,8 +24,8 @@ mod tests {
         assert_eq!(res,hash_vide)
     }
 
-    // test unitaire sur la fonction de réduction, vérifie que le résultat que l'on est cencé obtenir (vérifié à la main sur papier)
-    // est bien celui que l'on obtient avec notre fonction
+    // Test unitaire sur la fonction de réduction, vérifie que le résultat que l'on est cencé obtenir (vérifié à la main sur papier)
+    // est bien celui que l'on obtient avec notre fonction.
     #[test]
     fn test_red_1() {
         let mut x = sha3("aa");
@@ -40,8 +40,8 @@ mod tests {
         assert_eq!("yw",password)
     }
 
-    // test unitaire sur l'attaque, on effectue une attaque sur une rainbow table dont on sait qu'elle contient le mot de passe 
-    // recherché et on regarde si on trouve bien le mot de passe
+    // Test unitaire sur l'attaque, on effectue une attaque sur une rainbow table dont on sait qu'elle contient le mot de passe 
+    // recherché et on regarde si on trouve bien le mot de passe.
     #[test]
     fn test_attack() {
         let file = File::open(format!("./data/RainbowTable_Test.json"));

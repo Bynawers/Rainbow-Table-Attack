@@ -6,7 +6,7 @@ const RC : [u64; 24] = [0x8000000000000000,0x4101000000000000,0x5101000000000001
 const R : [[i16;5] ; 5] = [[0, 36, 3, 41, 18], [1, 44, 10, 45, 2], 
 [62, 6, 43, 15, 61], [28, 55, 25, 21, 56], [27, 20, 39, 8, 14]];
 
-//modifié les caractère sont écrit à l'envers
+//Modifié les caractère sont écrit à l'envers.
 fn padding(password : &str) -> u64 {
     //Padding
     let passacii = password.as_bytes();
@@ -22,10 +22,9 @@ fn padding(password : &str) -> u64 {
     padding64 <<= 3;
     padding64 |= 0b11; // 01 c'est le domaine pour tous les SHA-3 et le derniers 1 et le premier 1 du bourage.
     padding64 <<= (64-passwordlen)-3;
-    //println!("{}",format!("{:b}",padding64).len());
     padding64
 }
-//modifié le 1 devait être dans le bloc 17
+//Modifié le 1 devait être dans le bloc 17.
 fn bit_to_tab(m:u64) -> [[u64;5];5]{
     let big_tab:[[u64;5];5] = [[m,0b0,0b0,0b0,0b0],
     [0b0,0b0,0b0,0b1,0b0],
@@ -36,8 +35,8 @@ fn bit_to_tab(m:u64) -> [[u64;5];5]{
     
 }
 
-// appelle 24 fois la fonction round (commentée plus bas) en partant d'un tableau 5x5 contenant des entiers sur 64 bits
-// et renvoie le tableau obtenu
+// Appelle 24 fois la fonction round (commentée plus bas) en partant d'un tableau 5x5 contenant des entiers sur 64 bits
+// et renvoie le tableau obtenu.
 fn keccak(mut a : [[u64;5];5] ) -> [[u64;5];5]{
     for i in 0..24 {
         a = round(a, RC[i]);
@@ -45,7 +44,7 @@ fn keccak(mut a : [[u64;5];5] ) -> [[u64;5];5]{
     a
 }
 
-// effectue la fonction rotation, qui décale les bits d'un entier de 64 bits
+// Effectue la fonction rotation, qui décale les bits d'un entier de 64 bits.
 fn rot(a1:u64,r_dec:i16) -> u64 {
     if r_dec == 0 {
         return a1
@@ -59,13 +58,13 @@ fn rot(a1:u64,r_dec:i16) -> u64 {
     rotate_bits
 }
 
-// appelle les fonctions iota,chi,thetha,rho_pi dans le bonne ordre et renvoie le tableau obtenu
+// Appelle les fonctions iota,chi,thetha,rho_pi dans le bonne ordre et renvoie le tableau obtenu.
 fn round(mut a : [[u64;5];5], v_rc : u64) -> [[u64;5];5] {
     let a_theta = theta(a);
     iota(chi(a_theta,rho_pi(a_theta)),v_rc)
 }
 
-//effectue la fonction theta
+//Effectue la fonction theta.
 fn theta(mut a : [[u64;5];5]) -> [[u64;5];5]{
     let mut c: [u64 ; 5] = [0,0,0,0,0];
     for x in 0..=4 {
@@ -84,7 +83,7 @@ fn theta(mut a : [[u64;5];5]) -> [[u64;5];5]{
     a 
 }
 
-//effectue les fonctions rho et pi
+//Effectue les fonctions rho et pi.
 fn rho_pi(a : [[u64;5];5]) -> [[u64;5];5]{
     let mut b: [[u64;5];5] = [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]];
     for x in 0..=4{
@@ -95,7 +94,7 @@ fn rho_pi(a : [[u64;5];5]) -> [[u64;5];5]{
     b
 }
 
-//effectue la fonction chi
+//Effectue la fonction chi.
 fn chi(mut a : [[u64;5];5], b : [[u64;5];5],) -> [[u64;5];5]{
     for x in 0..=4{
         for y in 0..=4{
@@ -105,13 +104,13 @@ fn chi(mut a : [[u64;5];5], b : [[u64;5];5],) -> [[u64;5];5]{
     a
 }
 
-//effectue la fonction iota
+//Effectue la fonction iota.
 fn iota(mut a : [[u64;5];5], v_rc :u64) -> [[u64;5];5]{
     a[0][0] = a[0][0] ^ v_rc;
     a
 }
 
-//effectue l'extraction du hashé (prend les 256 premiers bits du tableau obtenu)
+//Effectue l'extraction du hashé (prend les 256 premiers bits du tableau obtenu).
 fn extraction(big_tab:[[u64;5];5]) -> [u8;32] {
     let mut hash_octet : [u8;32] = [0;32];
     let mut tab:[u64;4] = [0,0,0,0];
@@ -130,7 +129,7 @@ fn extraction(big_tab:[[u64;5];5]) -> [u8;32] {
     hash_octet
 }
 
-// renvoie le hashé obtenu a partir de password
+// Renvoie le hashé obtenu a partir de password.
 pub fn sha3(password : &str) -> [u8;32] {
     extraction(keccak(bit_to_tab(padding(password))))
 }
