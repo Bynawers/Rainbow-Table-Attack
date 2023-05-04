@@ -1,8 +1,9 @@
 use rayon::prelude::*;
 use num_cpus;
 use std::sync::{Arc, Mutex};
-
 use random_string::generate;
+use indicatif::{ProgressBar, ProgressStyle, ProgressState};
+use std::{fmt::Write};
 
 use crate::{
     sha3::sha3,
@@ -17,12 +18,17 @@ pub fn pool() -> Vec<Node> {
     let num_threads = num_cpus::get();
     println!("Tu peux créer {} threads.", num_threads);
 
+    let bar = ProgressBar::new(50);
+
+    bar.set_style(ProgressStyle::with_template("{spinner:.magenta} [{elapsed_precise}] {wide_bar:.magenta} ({eta})")
+        .unwrap()
+        .with_key("eta", |state: &ProgressState, w: &mut dyn Write| write!(w, "{:.1}s", state.eta().as_secs_f64()).unwrap()));
     // Création d'une Pool de threads via la bibliothèque rayon
     let pool = rayon::ThreadPoolBuilder::new().num_threads(num_threads).build().unwrap();
     let slice = NB_PASSWORD / num_threads as u32;
     // Variable qui a une mémoire partagé avec les threads.
     let starting_items_shared = Arc::new(Mutex::new(Vec::<String>::new()));
-
+    let bar_shared : Arc<Mutex<ProgressBar>> = Arc::new(Mutex::new(bar.clone()));
     /* Initialisation des threads pour qu'ils exécutent la fonction generate_table sur une portion des mots de passe stockables dans la rainbow_table.
        Et que les portions de mots de passe générées par les threads seront assemblées dans une table unique.
     */
@@ -31,32 +37,35 @@ pub fn pool() -> Vec<Node> {
             .map(|i| {
                 let start = i as u32 * slice;
                 let end = if i == num_threads - 1 { NB_PASSWORD } else { start + slice };
-                generate_table(start,end,starting_items_shared.clone())
+                generate_table(start,end,starting_items_shared.clone(), bar_shared.clone())
             })
             .flatten().collect()
     });
+    bar_shared.lock().unwrap().inc(1);
+    bar.finish_and_clear();
+    println!("■ La génération de la RainbowTable est terminée.");
     table
 }
 //pub const CHARSET: &str = "abcdefghijklmnopqrstuvwxyz";
 
 // Création d'une portion de la Rainbow_table
 fn generate_table(
-    startpassword : u32,
-    endpassword : u32, 
-    starting_items_shared : Arc<Mutex<Vec<String>>>
+    startpassword: u32,
+    endpassword: u32, 
+    starting_items_shared: Arc<Mutex<Vec<String>>>,
+    bar: Arc<Mutex<ProgressBar>>
 ) -> Vec<Node> {
     let charset: String = SIGMA.iter().collect::<String>();
     //println!("{} start ,{} end ", startpassword ,endpassword);
     let mut rainbow_table : Vec<Node> = vec![];
     let mut hash = sha3(GENERATOR_RAINBOW_TABLE);
     let mut reduce = generate(SIZE as usize,&charset);
-    //let mut starting_items = Vec::<String>::new();
     let mut node = Node { 
         start: String::from(""), 
         end: String::from("") 
     };
-
-    for _ in startpassword..endpassword {
+    let mut k : u32 = 1;
+    for i in startpassword..endpassword {
         for j in 0..NB_NODE {
             if j == 0 { 
                 
@@ -83,7 +92,11 @@ fn generate_table(
             else {
                 hash = sha3(&reduce);
                 reduce = reduction(hash,j+NONCE);
-                //print!("valeur de j : {}    ",j);
+            }
+            if i == ((endpassword - startpassword) / 50) * k && k <= 50 {
+                let barr = bar.lock().unwrap().inc((1)as u64);
+                k += 1;
+                drop(barr);
             }
         }
         rainbow_table.push(node.clone());
