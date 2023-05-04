@@ -32,11 +32,12 @@ fn bit_to_tab(m:u64) -> [[u64;5];5]{
     [0b0,0b0,0b0,0b0,0b0],
     [0b0,0b0,0b0,0b0,0b0],
     [0b0,0b0,0b0,0b0,0b0]];
-    //println!("{:?}",big_tab);
     big_tab
     
 }
 
+// appelle 24 fois la fonction round (commentée plus bas) en partant d'un tableau 5x5 contenant des entiers sur 64 bits
+// et renvoie le tableau obtenu
 fn keccak(mut a : [[u64;5];5] ) -> [[u64;5];5]{
     for i in 0..24 {
         a = round(a, RC[i]);
@@ -44,78 +45,37 @@ fn keccak(mut a : [[u64;5];5] ) -> [[u64;5];5]{
     a
 }
 
+// effectue la fonction rotation, qui décale les bits d'un entier de 64 bits
 fn rot(a1:u64,r_dec:i16) -> u64 {
     if r_dec == 0 {
         return a1
     }
-    //println!("{} : a1 ",a1);
     let y = a1 >> r_dec;
-    //println!("{} : décalage à droite.",format!("{:b}", y));
     let mask = (1 << r_dec) - 1;
-    //println!("{} : mask.",format!("{:b}", mask));
     let last_bits = a1 & mask;
-    //println!("{} : derniers bits.",format!("{:b}", last_bits));
     let mut rotate_bits = last_bits << (64 - r_dec);
-    //println!("{} : rotation.",format!("{:b}", rotate_bits));
-    //println!("{} : valeur donnée.",format!("{:b}", a1));
     rotate_bits |= y;
-    //println!("{} : résultats.",format!("{:b}", rotate_bits));
+    
     rotate_bits
 }
 
-fn round(a : [[u64;5];5], v_rc : u64) -> [[u64;5];5] {
-    /*// teta
-    let mut c: [u64 ; 5] = [0,0,0,0,0];
-    for x in 0..=4 {
-        c[x] = a[x][0] ^ a[x][1] ^ a[x][2] ^ a[x][3] ^ a[x][4];
-    }
-    //println!("{:?} :a",a);
-    let mut d: [u64 ; 5] = [0,0,0,0,0];
-    
-    for x in 0..=4 {
-        d[x] = c[(x+5-1) % 5] ^ rot(c[(x+1)%5],1); // faire un shift sur [c[x+1]][1] pour qu'il boufe de i à i + R
-    }
-    //println!("{:?} :c",c);
-    //println!("{:?}",d);
-    for x in 0..=4{
-        for y in 0..=4{
-            a[x][y] = a[x][y] ^ d[x]
-        }
-    } 
-    // p et pi
-    let mut b: [[u64;5];5] = [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]];
-    for x in 0..=4{
-        for y in 0..=4{
-            b[y][(((2*x) + (3*y)) % 5)] = rot(a[x][y],R[x][y]) // faire un shift sur [a[x][y]][R[x][y]] pour qu'il boufe de i à i + R
-        }
-    }
-    //println!("{:?} : b",b); // j'ai pas verifier tous les elt du b
-    for x in 0..=4{
-        for y in 0..=4{
-            a[x][y] = b[x][y] ^ ((!b[(x+1)%5][y]) & b[(x+2)%5][y])
-        }
-    }
-    // T
-    //println!("{:}",v_rc);
-    a[0][0] = a[0][0] ^ v_rc;
-    a*/
+// Appelle les fonctions iota,chi,thetha,rho_pi dans le bonne ordre et renvoie le tableau obtenu.
+fn round(mut a : [[u64;5];5], v_rc : u64) -> [[u64;5];5] {
     let a_theta = theta(a);
     iota(chi(a_theta,rho_pi(a_theta)),v_rc)
 }
 
+//effectue la fonction theta
 fn theta(mut a : [[u64;5];5]) -> [[u64;5];5]{
     let mut c: [u64 ; 5] = [0,0,0,0,0];
     for x in 0..=4 {
         c[x] = a[x][0] ^ a[x][1] ^ a[x][2] ^ a[x][3] ^ a[x][4];
     }
-    //println!("{:?} :a",a);
     let mut d: [u64 ; 5] = [0,0,0,0,0];
     
     for x in 0..=4 {
-        d[x] = c[(x+5-1) % 5] ^ rot(c[(x+1)%5],1); // faire un shift sur [c[x+1]][1] pour qu'il boufe de i à i + R
+        d[x] = c[(x+5-1) % 5] ^ rot(c[(x+1)%5],1); 
     }
-    //println!("{:?} :c",c);
-    //println!("{:?}",d);
     for x in 0..=4{
         for y in 0..=4{
             a[x][y] = a[x][y] ^ d[x]
@@ -124,6 +84,7 @@ fn theta(mut a : [[u64;5];5]) -> [[u64;5];5]{
     a 
 }
 
+//effectue les fonctions rho et pi
 fn rho_pi(a : [[u64;5];5]) -> [[u64;5];5]{
     let mut b: [[u64;5];5] = [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]];
     for x in 0..=4{
@@ -134,6 +95,7 @@ fn rho_pi(a : [[u64;5];5]) -> [[u64;5];5]{
     b
 }
 
+//effectue la fonction chi
 fn chi(mut a : [[u64;5];5], b : [[u64;5];5],) -> [[u64;5];5]{
     for x in 0..=4{
         for y in 0..=4{
@@ -143,17 +105,15 @@ fn chi(mut a : [[u64;5];5], b : [[u64;5];5],) -> [[u64;5];5]{
     a
 }
 
+//effectue la fonction iota
 fn iota(mut a : [[u64;5];5], v_rc :u64) -> [[u64;5];5]{
     a[0][0] = a[0][0] ^ v_rc;
     a
 }
 
+//effectue l'extraction du hashé (prend les 256 premiers bits du tableau obtenu)
 fn extraction(big_tab:[[u64;5];5]) -> [u8;32] {
     let mut hash_octet : [u8;32] = [0;32];
-    //let mut c : String = String::new();
-    //println!("{:?}",big_tab[0]);
-    //let tab : [u64;4] = [0x5C19BAE5F247A44D,0x203AE8B4D6CB09BD,0xA1FA10767CB94ADA,0x62FD47A288C2A84C];
-    //let value : u64 = 0x5C19BAE5F247A44D;
     let mut tab:[u64;4] = [0,0,0,0];
     for j in 0..4 {
         tab[j] = big_tab[j][0];
@@ -161,32 +121,16 @@ fn extraction(big_tab:[[u64;5];5]) -> [u8;32] {
      for j in 0..tab.len() {
         for i in 0..64/8 {
             let mask = 0xff << ((64-8)/8 - i)*8;
-            //println!("{:b} : mask ",mask);
             let bits_value = tab[j] & mask;
-            //println!("{:x}",bits_value);
             let octet_value : u8 = (bits_value >> ((64-8)/8 - i)*8) as u8;
-            //println!("{:b}",octet_value);
             let octet_reverse: u8 = octet_value.reverse_bits();
-            //println!("{}",i);
             hash_octet[i+ j*8] = octet_reverse;
-            //println!("{:02x}",octet_reverse);
-            //c = c + format!("{:02x}",octet_reverse).as_str();
         }
     }
-    
-    //println!("{:?}",c);
-    //println!("{:?}",hash_octet);
-    //println!("{:b}",value.reverse_bits());
-    //for elt in big_tab{}
     hash_octet
 }
 
+// renvoie le hashé obtenu a partir de password
 pub fn sha3(password : &str) -> [u8;32] {
     extraction(keccak(bit_to_tab(padding(password))))
-    /*let c = padding(password);
-    let tab = bit_to_tab(c);
-    //println!("{:?}",tab);
-    let res = kecak(tab);
-    let res = extraction(res);
-    res*/
 }

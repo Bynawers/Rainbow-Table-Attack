@@ -30,8 +30,8 @@ enum Command {
         #[structopt(short = "t", long = "type", possible_values=&["attack", "reduction", "table"])]
         type_perf: Option<String>,
     },
-    #[structopt(name = "test")]
-    Test {
+    #[structopt(name = "table")]
+    Table {
         
     },
 }
@@ -84,21 +84,13 @@ fn main() {
                 None => ()
             }
         }
-        Command::Test { } => {
+        Command::Table { } => {
             println!("Parallel Testing ..");
-            println!("> RainbowTable Password Total: {}", NB_PASSWORD * NB_NODE);
-            let start = Instant::now();
-            let res = pool();
-            serialize(&res).unwrap();
-            let end = Instant::now();
-            let duration = end - start;
-            println!("      time: {} seconds.", duration.as_secs_f32().to_string().purple());
-            /*  Bordel ici */
             let start = Instant::now();
             create_table();
             let end = Instant::now();
             let duration = end - start;
-            println!("      time: {:?}", duration)
+            println!("      time: {} seconds.", duration.as_secs_f32().to_string().purple());
         }
     }
 }
