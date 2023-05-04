@@ -1,6 +1,7 @@
 use std::fs::{File, read_dir, remove_file};
 use std::io::{Write, Result, Read};
 use serde_json::{to_string,from_str};
+use std::fs;
 
 use crate::rainbow_table::Node;
 
@@ -62,4 +63,24 @@ pub fn delete_file_in_directory(directory: &str, filename: &str) -> std::io::Res
     let path = std::path::Path::new(directory).join(filename);
     remove_file(path)?;
     Ok(())
+}
+
+// Supprime tout les fichiers contenu dans le dossier directory
+pub fn delete_all_file_in_directory(directory: &str) {
+    if let Ok(entries) = fs::read_dir(directory) {
+        for entry in entries {
+            if let Ok(entry) = entry {
+                let path = entry.path();
+                if path.is_file() {
+                    if let Err(e) = fs::remove_file(path) {
+                        println!("Error deleting file: {:?}", e);
+                    }
+                }
+            } else if let Err(e) = entry {
+                println!("Error reading directory entry: {:?}", e);
+            }
+        }
+    } else {
+        println!("Error reading directory: {}", directory);
+    }
 }

@@ -1,19 +1,19 @@
 // Attack
 pub const GENERATOR_RAINBOW_TABLE: &str = "Crypto";
-pub const FLAG: &str = "a2";
-pub const TEST:bool = true;
+pub const FLAG: &str = "a8z";
+pub const TEST:bool = false;
 
 // Create RainbowTable
 pub const NONCE: u32 = 248820715;
 
-pub const NB_PASSWORD: u32 = 480;
-pub const NB_NODE: u32 = 250;
+pub const NB_PASSWORD: u32 = 101;
+pub const NB_NODE: u32 = 50;
 
 // Mot de Passe
 pub const SIZE: u8 = 2;
-pub const SIGMA_SIZE: u8 = 36;
-pub const SIGMA: [char; 36] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+pub const SIGMA_SIZE: u8 = 39;
+pub const SIGMA: [char; 39] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','!', '?','#'];
 
 // Debug
 pub const DEBUG: bool = false;

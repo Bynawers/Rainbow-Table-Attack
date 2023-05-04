@@ -88,7 +88,7 @@ fn rho_pi(a : [[u64;5];5]) -> [[u64;5];5]{
     let mut b: [[u64;5];5] = [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]];
     for x in 0..=4{
         for y in 0..=4{
-            b[y][(((2*x) + (3*y)) % 5)] = rot(a[x][y],R[x][y]) // faire un shift sur [a[x][y]][R[x][y]] pour qu'il boufe de i à i + R
+            b[y][((2*x) + (3*y)) % 5] = rot(a[x][y],R[x][y]) // faire un shift sur [a[x][y]][R[x][y]] pour qu'il boufe de i à i + R
         }
     }
     b
