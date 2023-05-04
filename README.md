@@ -45,7 +45,12 @@ attack
 table
 ```
 
+Delete json file in data (all files with --all)
+```
+cargo run delete <--all / -a>
+```
+
 Unit test of SHA-3-256 functions
 ```
-cargo run test
+cargo test
 ```
