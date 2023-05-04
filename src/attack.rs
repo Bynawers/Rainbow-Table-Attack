@@ -6,6 +6,10 @@ use crate::rainbow_table::Node;
 
 use colored::*;
 
+use rayon::prelude::*;
+use num_cpus;
+
+
 
 pub fn execution(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32]) -> bool {
 
@@ -58,43 +62,77 @@ pub fn execution(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32]) -> bool {
 
         //ici on appelle la fonction compare_end qui renvoie la position de la chaine où le dernier élément = reduce
         // si aucune chaine ne correspond au reduce que l'on a, la fonction renvoie NB_PASSWORD (qui correspond a l'indice max + 1)
-        position_flag = compare_end(rainbow_table, reduce.clone());
-        if position_flag != NB_PASSWORD {
+        position_flag = pool_search(rainbow_table, reduce.clone());
+        if position_flag.len() != 0 {
             // on appelle ici la fonction reverse, qui recréé la chaine en repartant du premier élément de la chaine
             // cette foncion renvoie true si le hashé que l'on recherche est dans la chaine et false sinon
-            if reverse(rainbow_table, hash_flag, position_flag) {
-                return true;
+            for elt in position_flag {
+                if reverse(rainbow_table, hash_flag, elt) {
+                    return true;
+                }
+                else {
+                    continue;
+                }
             }
-            else {
-                continue;
-            }
-            
         } 
         else {
             if DEBUG { println!("{}", "not find !".red()); }
         }
     }
-    println!("{}", "FLAG not found".red());
+    if DEBUG { println!("{}", "FLAG not found".red());}
     return false;
+}
+
+fn pool_search(rainbow_table: &mut Vec<Node>, value: String) -> Vec<u32> {
+    let num_threads = num_cpus::get();
+    // Création d'une Pool de threads via la bibliothèque rayon
+    let pool = rayon::ThreadPoolBuilder::new().num_threads(num_threads).build().unwrap();
+    let slice = NB_PASSWORD / num_threads as u32;
+    let allpositions: Vec<u32> = pool.install(|| {
+        (0..num_threads).into_par_iter()
+            .map(|i| {
+                let start = i as u32 * slice;
+                let end = if i == num_threads - 1 { NB_PASSWORD } else { start + slice };
+                compare_end(rainbow_table.clone(), value.clone(), start, end)
+            }).flatten().collect()
+    });
+    //println!("{}", allpositions.len());
+    let allpositions : Vec<u32> = allpositions.into_iter().collect::<std::collections::HashSet<_>>().into_iter().collect();
+    allpositions
 }
 
 /*
 *   Compare la value d'entrée à toute les valeurs "end" de la rainbowtable passé en entrée
 */
-fn compare_end(rainbow_table: &mut Vec<Node>, value: String) -> u32 {
-
+fn compare_end(rainbow_table: Vec<Node>, value: String, start: u32, end: u32,
+) -> Vec<u32> {
+    let mut allpositions : Vec<u32> = Vec::<u32>::new();
+    for i in start..end {
+        if rainbow_table[i as usize].end == value {
+            if DEBUG {
+                print!("{}", "find !".green());
+                println!(" {} position {}", value, i);
+            }
+            allpositions.push(i);
+        }
+    }
+    allpositions
+}
+/* 
+fn compare_end(rainbow_table: &mut Vec<Node>, value: String) -> Vec<u32> {
+    let mut allpositions : Vec<u32> = Vec::<u32>::new();
     for i in 0..NB_PASSWORD {
         if rainbow_table[i as usize].end == value {
             if DEBUG {
                 print!("{}", "find !".green());
                 println!(" {} position {}", value, i);
             }
-            return i;
+            allpositions.push(i);
         }
     }
-    return NB_PASSWORD;
+    allpositions
 }
-
+*/
 //recréé la chaine à l'indice position_flag a partir du premier élément de la chaine et renvoie true si 
 // hash flag est dans la chaine
 fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u32) -> bool {
@@ -105,9 +143,9 @@ fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u3
     }
 
     let mut tmp: [u8; 32];
-    let mut reduce: String = String::from("");
+    let mut reduce: String = String::from(rainbow_table[(position_flag)as usize].start.clone());
 
-    let mut trouve = false;
+    let trouve = false;
 
     for i in 0..NB_NODE {
 
@@ -121,7 +159,7 @@ fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u3
         if DEBUG { print!("{} (R{}) => ", reduce,i); }
 
         if tmp == hash_flag {
-            println!("{} le mot de passe recherché est :  {}", "FLAG found !".green(),reduce.green());
+            if !TEST { println!("{} le mot de passe recherché est :  {}", "FLAG found !".green(),reduce.green()) };
             return true;
         }
 
@@ -228,7 +266,7 @@ fn reverse_test(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_fla
     let mut tmp: [u8; 32];
     let mut reduce: String = String::from("");
 
-    let mut trouve = false;
+    let trouve = false;
 
     for i in 0..50 {
 

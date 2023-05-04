@@ -1,10 +1,11 @@
-use rainbow_table::{
+use rainbow_table_attack::reduction::reduction;
+use rainbow_table_attack::{
+    sha3::sha3,
     attack,
     performance::*,
-    rainbow_table::*,
+    rainbow_table::{Node,pool},
     constants::*,
     file::*,
-    para::pool, sha3::sha3
 };
 use std::time::{Instant};
 use colored::*;
@@ -75,7 +76,7 @@ fn main() {
                 }
             }
             match performance {
-                Some(value) => { 
+                Some(value) => {
                     println!("> Performance {:?}", value.type_perf);
                     println!("      time: {:?}", value.time);
                     println!("      percent test: {:?}%", value.percent.unwrap());
@@ -92,12 +93,12 @@ fn main() {
             let end = Instant::now();
             let duration = end - start;
             println!("      time: {} seconds.", duration.as_secs_f32().to_string().purple());
-            /*  Bordel ici 
+            /*  Bordel ici */
             let start = Instant::now();
             create_table();
             let end = Instant::now();
             let duration = end - start;
-            println!("      time: {:?}", duration)*/
+            println!("      time: {:?}", duration)
         }
     }
 }
@@ -106,12 +107,12 @@ fn create_table() {
     println!("> Passwords: {} Nodes: {}", NB_PASSWORD, NB_NODE);
     println!("> RainbowTable Password Total: {}", NB_PASSWORD * NB_NODE);
     println!("> Language Password Total: {}", (SIGMA_SIZE as u64).pow(SIZE as u32));
-    /*if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE)) {
+    /* if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE)) {
         println!("RainbowTable already exist !");
     }
     else {
         println!("Create RainbowTable...");
-        let rainbow_table: Vec<Node> = generate_table();
+        let rainbow_table: Vec<Node> = pool();
         serialize(&rainbow_table).unwrap();
     }*/
     println!("Create RainbowTable...");
