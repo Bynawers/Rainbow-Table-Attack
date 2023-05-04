@@ -8,10 +8,6 @@ use colored::*;
 
 use rayon::prelude::*;
 use num_cpus;
-use std::sync::{
-    Arc,
-    atomic::{AtomicBool, Ordering},
-};
 
 
 
@@ -149,7 +145,7 @@ fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u3
     let mut tmp: [u8; 32];
     let mut reduce: String = String::from(rainbow_table[(position_flag)as usize].start.clone());
 
-    let mut trouve = false;
+    let trouve = false;
 
     for i in 0..NB_NODE {
 
@@ -270,7 +266,7 @@ fn reverse_test(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_fla
     let mut tmp: [u8; 32];
     let mut reduce: String = String::from("");
 
-    let mut trouve = false;
+    let trouve = false;
 
     for i in 0..50 {
 
