@@ -3,10 +3,9 @@ use rainbow_table_attack::{
     sha3::sha3,
     attack,
     performance::*,
-    rainbow_table::*,
+    rainbow_table::{Node,pool},
     constants::*,
     file::*,
-    para::pool
 };
 use std::time::{Instant};
 use colored::*;
