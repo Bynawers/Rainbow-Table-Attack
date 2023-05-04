@@ -48,6 +48,10 @@ enum Command {
     #[structopt(name = "table")]
     Table {
     },
+    #[structopt(name = "test2")]
+    Test2 {
+        
+    },
 }
 
 fn main() {
@@ -56,7 +60,7 @@ fn main() {
     match args.cmd {
         Command::Attack { } => {
             println!("{} {} Generate Rainbow Table...", style("[1/3]").bold().dim(), LOOKING_GLASS);
-            if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE)) {
+            if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}.json", SIZE, *NB_PASSWORD, *NB_NODE)) {
                 println!("Existing file found !");
             }
             else {
@@ -116,19 +120,19 @@ fn main() {
         }
         Command::Test { } => {
             println!("Parallel Testing ..");
-            println!("> RainbowTable Password Total: {}", NB_PASSWORD * NB_NODE);
+            println!("> RainbowTable Password Total: {}", (*NB_PASSWORD) * (*NB_NODE));
             let start = Instant::now();
             let res = pool();
             serialize(&res).unwrap();
             let end = Instant::now();
             let duration = end - start;
             println!("      time: {} seconds.", duration.as_secs_f32().to_string().purple());
-            /*  Bordel ici */
+            /*  Bordel ici 
             let start = Instant::now();
             create_table();
             let end = Instant::now();
             let duration = end - start;
-            println!("      time: {:?}", duration)
+            println!("      time: {:?}", duration)*/
         },
         Command::Table { } => {
             println!("{} {} Generate table...", style("[1/1]").bold().dim(), DELETE);
@@ -142,14 +146,18 @@ fn main() {
                 delete_all_file_in_directory("./data");
             }
             else {
-                delete_file_in_directory("./data", &format!("RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE));  
+                delete_file_in_directory("./data", &format!("RainbowTable_{}_{}_{}.json", SIZE, *NB_PASSWORD, *NB_NODE));  
             }          
+        }
+        Command::Test2 {} => {
+            println!("{} {} constante", *NB_PASSWORD, *NB_NODE);         
+            println!("{} {} constante", *NB_PASSWORD, *NB_NODE);         
         }
     }
 }
 
 fn create_table() {
-    if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE)) {
+    if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}.json", SIZE, *NB_PASSWORD, *NB_NODE)) {
         println!("RainbowTable already exist !");
     }
     else {

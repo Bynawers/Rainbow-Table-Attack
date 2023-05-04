@@ -42,7 +42,7 @@ pub fn perf_reduction() -> Performance {
 
     let start = Instant::now();
 
-    for i in 0..NB_NODE*NB_PASSWORD {
+    for i in 0..(*NB_NODE)*(*NB_PASSWORD) {
         
         reduce = reduction(hash.as_slice().try_into().unwrap(), i+NONCE);
         if !contains(&reduce, &password_reduce) {
@@ -102,7 +102,7 @@ pub fn perf_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
             all_passw.push(String::from(red.clone()));
         }
 
-        for i in 1..NB_NODE {
+        for i in 1..*NB_NODE {
             let hash = sha3(&red.clone());
 
             red = reduction(hash, i+NONCE);
@@ -123,7 +123,7 @@ pub fn perf_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
 pub fn perf_para_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
     let start = Instant::now();
 
-    let bar = ProgressBar::new(NB_PASSWORD as u64);
+    let bar = ProgressBar::new(*NB_PASSWORD as u64);
 
     bar.set_style(ProgressStyle::with_template("{spinner:.green} [{elapsed_precise}] {wide_bar} ({eta})")
         .unwrap()
@@ -131,13 +131,13 @@ pub fn perf_para_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
     
     let num_threads = num_cpus::get();
     let pool = rayon::ThreadPoolBuilder::new().num_threads(num_threads).build().unwrap();
-    let slice = NB_PASSWORD / num_threads as u32;
+    let slice = *NB_PASSWORD / num_threads as u32;
     
     let all_passw : Vec<String> = pool.install(|| {
         (0..num_threads).into_par_iter()
             .map(|i| {
                 let start = i as u32 * slice;
-                let end = if i == num_threads - 1 { NB_PASSWORD } else { start + slice };
+                let end = if i == num_threads - 1 { *NB_PASSWORD } else { start + slice };
                 para_rainbow_test(start, end, rainbow_table, &bar)
             }).flatten().collect()
     });
@@ -158,7 +158,7 @@ fn para_rainbow_test(startpassword : u32, endpassword: u32, rainbow_table: &Vec<
             all_passw.push(red.clone());
         }
 
-        for j in 1..NB_NODE {
+        for j in 1..*NB_NODE {
             let hash = sha3(&red);
 
             red = reduction(hash, j+NONCE);

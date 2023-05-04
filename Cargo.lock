@@ -347,6 +347,7 @@ dependencies = [
  "colored",
  "console",
  "indicatif",
+ "lazy_static",
  "num_cpus",
  "random-string",
  "rayon",
