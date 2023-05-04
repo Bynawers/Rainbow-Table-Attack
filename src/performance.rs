@@ -74,7 +74,7 @@ pub fn perf_attack(rainbow_table: &mut Vec<Node>, nb_test: u32) -> Performance {
     for _ in 0..nb_test {
         password = increment_string(&password);
         
-        match execution(rainbow_table, &password.to_string()) {
+        match execution(rainbow_table, sha3(&password.to_string())) {
             None => fail += 1,
             Some(_) => success += 1
         }

@@ -1,12 +1,16 @@
-use rainbow_table_attack::attack;
-use rainbow_table_attack::performance::*;
-use rainbow_table_attack::rainbow_table::*;
-use rainbow_table_attack::constants::*;
-use rainbow_table_attack::file::*;
-use rainbow_table_attack::parallelization;
-
 use console::{style, Emoji};
 use colored::*;
+use structopt::StructOpt;
+use std::time::{Instant};
+
+use rainbow_table_attack::{
+    sha3::sha3,
+    attack,
+    performance::*,
+    rainbow_table::{ Node,pool },
+    constants::*,
+    file::*,
+};
 
 static LOOKING_GLASS: Emoji<'_, '_> = Emoji("🔍", "");
 static SAVE: Emoji<'_, '_> = Emoji("🖿 ", "");
@@ -14,10 +18,8 @@ static ATTACK: Emoji<'_, '_> = Emoji("⚔️ ", "");
 static DELETE: Emoji<'_, '_> = Emoji("🗑️ ", "");
 static PERFORMANCE: Emoji<'_, '_> = Emoji("📈 ", "");
 
-use structopt::StructOpt;
-
 #[derive(StructOpt)]
-#[structopt(name = "combat", about = "A command-line for rainbow table attack")]
+#[structopt(name = "rainbow_table_attack", about = "A command-line for rainbow table attack")]
 struct Cli {
     #[structopt(subcommand)]
     cmd: Command,
@@ -42,6 +44,10 @@ enum Command {
         #[structopt(short = "a", long = "all")]
         all: bool,
     },
+
+    #[structopt(name = "table")]
+    Table {
+    },
 }
 
 fn main() {
@@ -60,7 +66,7 @@ fn main() {
             let mut rainbow_table: Vec<Node> = deserialize().unwrap();
 
             println!("{} {} Attack...", style("[3/3]").bold().dim(), ATTACK);
-            let result = attack::execution(&mut rainbow_table, FLAG); 
+            let result = attack::execution(&mut rainbow_table, sha3(FLAG)); 
 
             match result {
                 None => println!("{}", "Failed Attack!".red()),
@@ -80,7 +86,7 @@ fn main() {
             println!("{} {} Save File...", style("[2/3]").bold().dim(), SAVE);
             let mut rainbow_table: Vec<Node> = deserialize().unwrap();
 
-            println!("{} {} Performance Attack Testing...", style("[3/3]").bold().dim(), PERFORMANCE);
+            println!("{} {} Performance Testing...", style("[3/3]").bold().dim(), PERFORMANCE);
 
             match type_perf {
                 None => performance = None,
@@ -109,8 +115,26 @@ fn main() {
             }
         }
         Command::Test { } => {
-            println!("Test..");
+            println!("Parallel Testing ..");
+            println!("> RainbowTable Password Total: {}", NB_PASSWORD * NB_NODE);
+            let start = Instant::now();
+            let res = pool();
+            serialize(&res).unwrap();
+            let end = Instant::now();
+            let duration = end - start;
+            println!("      time: {} seconds.", duration.as_secs_f32().to_string().purple());
+            /*  Bordel ici */
+            let start = Instant::now();
+            create_table();
+            let end = Instant::now();
+            let duration = end - start;
+            println!("      time: {:?}", duration)
         },
+        Command::Table { } => {
+            println!("{} {} Generate table...", style("[1/1]").bold().dim(), DELETE);
+
+            create_table(); 
+        }
         Command::Delete { all } => {
             println!("{} {} Deleting...", style("[1/1]").bold().dim(), DELETE);
 
@@ -129,7 +153,7 @@ fn create_table() {
         println!("RainbowTable already exist !");
     }
     else {
-        let rainbow_table: Vec<Node> = parallelization::pool();
+        let rainbow_table: Vec<Node> = pool();
         serialize(&rainbow_table).unwrap();
     }
 }
