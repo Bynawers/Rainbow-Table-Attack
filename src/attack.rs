@@ -118,21 +118,7 @@ fn compare_end(rainbow_table: Vec<Node>, value: String, start: u32, end: u32,
     }
     allpositions
 }
-/* 
-fn compare_end(rainbow_table: &mut Vec<Node>, value: String) -> Vec<u32> {
-    let mut allpositions : Vec<u32> = Vec::<u32>::new();
-    for i in 0..NB_PASSWORD {
-        if rainbow_table[i as usize].end == value {
-            if DEBUG {
-                print!("{}", "find !".green());
-                println!(" {} position {}", value, i);
-            }
-            allpositions.push(i);
-        }
-    }
-    allpositions
-}
-*/
+
 //recréé la chaine à l'indice position_flag a partir du premier élément de la chaine et renvoie true si 
 // hash flag est dans la chaine
 fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u32) -> bool {
@@ -167,12 +153,6 @@ fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u3
     }
     if DEBUG && !trouve { println!("{}", "FLAG not found".red()); }
     return trouve;
-}
-
-pub fn print_hash(tab: [u8;32]) {
-    for elt in tab {
-        print!("{:0x}",elt);
-    }
 }
 
 /* les fonctions ci dessous sont identiques à celles qu'il y a au dessous à peu de choses près
