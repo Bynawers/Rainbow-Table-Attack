@@ -33,30 +33,7 @@ pub enum Error {
 
 const NB_PASSWORD_TOTAL: u64 = (SIGMA_SIZE as u64).pow(SIZE as u32);
 
-pub fn perf_reduction() -> Performance {
-
-    let mut password_reduce: Vec<String> = Vec::new();
-
-    let mut hash = sha3(GENERATOR_RAINBOW_TABLE);
-    let mut reduce;
-
-    let start = Instant::now();
-
-    for i in 0..(*NB_NODE)*(*NB_PASSWORD) {
-        
-        reduce = reduction(hash.as_slice().try_into().unwrap(), i+NONCE);
-        if !contains(&reduce, &password_reduce) {
-            password_reduce.push(reduce.clone());
-        }
-        hash = sha3(&reduce);
-    }
-
-    let end = Instant::now();
-    let duration = end - start;
-
-    return Performance { type_perf: Type::Reduction, percent: Some(0.0), collision: Some(0.0 as usize), time: duration };
-}
-
+// Cette fonction appelle la fonction attack dans le fichier attack.rs et affiche le temps que celle ci met à s'exécuter.
 pub fn perf_attack(rainbow_table: &mut Vec<Node>, nb_test: u32) -> Performance {
 
     let bar = ProgressBar::new(nb_test as u64);
@@ -92,7 +69,8 @@ pub fn perf_attack(rainbow_table: &mut Vec<Node>, nb_test: u32) -> Performance {
 /* Cette fonction prend en argument une rainbow table en argument. On part des premiers noeuds de chaque ligne de la rainbow table et on recréé les lignes à partir
 de ces derniers. A chaque fois que l'on tombe sur une chaine de caractère que l'on a pas encore croisé, on l'ajoute à un vecteur.
 Une fois le processus terminé, on divise SIGMA _SIZE(le nombre de carcatère que l'on décide de prendre en comtpe)^SIZE(la taille des chaines de caractères)
-par la taille du vecteur. On multiplie le résultat par 100 ce qui nous le pourcentage de mots de passes que l'on a testé.
+par la taille du vecteur. On multiplie le résultat par 100 ce qui nous le pourcentage de mots de passes que l'on a testé. On affiche aussi le temps que cette
+fonction a mis à s'exécuter.
  */
 pub fn perf_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
 
