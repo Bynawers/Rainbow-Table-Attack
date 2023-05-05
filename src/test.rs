@@ -215,7 +215,7 @@ fn reduction_test(hash: [u8; 32], nonce: u32) -> String {
     password
 }
 
-// Cette fonction est identique à celle au dessus, mais elle etrait toujours 2 octets.
+// Cette fonction est identique à celle au dessus, mais elle extrait toujours 2 octets.
 fn to_password_test(bytes: &[u8; 32]) -> String {
     let mut password: String = String::from("");
 

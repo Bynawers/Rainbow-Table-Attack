@@ -15,7 +15,7 @@ use colored::*;
 *                    etc... jusqu'a NB_NODES itération
 *    Puis, à chaque itération, on compare le reduce avec toutes les fin de chaines de la rainbow table
 *    Si on trouve une fin de chaine = reduce, cela veut dire que le hashé recherché est peut-être dans la chaine
-*    On recalcule ensuite la chaine en repartant du première élément de la chaine, puis si on retombe sur le hashé recherché,
+*    On recalcule ensuite la chaine en repartant du premier élément de la chaine, puis si on retombe sur le hashé recherché,
 *    on a retrouvé le mot de passe recheché et on renvoie le reduce précédent le hashé que l'on a retrouvé dans la chaine
 */
 pub fn execution(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32]) -> Option<String> {

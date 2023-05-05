@@ -8,9 +8,9 @@ use crate::rainbow_table::Node;
 use crate::constants::{SIZE, NB_PASSWORD, NB_NODE};
 
 
-// Cette fonction prend en argument un vecteur (dans notre cas une rainbow table) et écrit dans un fichier .json le contenu 
-// de cette table en le nomant avec les constantes définies.
-pub fn serialize<T>(data: &Vec<T>) -> Result<()>
+// Prend en argument un vecteur (dans notre cas une rainbow table) et écrit dans un fichier .json le contenu 
+// de cette table en le nommant avec les constantes définies.
+pub fn serialize<T>(data: &Vec<T>,i:u8) -> Result<()>
 where
     T: serde::Serialize,
 {
@@ -18,7 +18,7 @@ where
 
     let json_string = to_string(data)?;
 
-    let mut file = File::create(&format!("./data/RainbowTable_{}_{}_{}.json", SIZE, *NB_PASSWORD, *NB_NODE))?;
+    let mut file = File::create(&format!("./data/RainbowTable_{}_{}_{}_{}.json", SIZE,i, *NB_PASSWORD, *NB_NODE))?;
 
     file.write_all(json_string.as_bytes())?;
 
@@ -27,11 +27,11 @@ where
     Ok(())
 }
 
-// Cette fonction va chercher dans le dossier data le fichier .json correspondant aux constantes actuelles et récupère
-// son contenu puis le transforme en vecteur de node qui sera une rainbow table.
-pub fn deserialize() -> Result<Vec<Node>> {
+// Cherche dans le dossier data le fichier .json correspondant aux constantes actuelles et récupère
+// son contenu puis le transforme en vecteur de noeuds qui sera une rainbow table.
+pub fn deserialize(i:u8) -> Result<Vec<Node>> {
 
-    let mut file = File::open(format!("./data/RainbowTable_{}_{}_{}.json", SIZE, *NB_PASSWORD, *NB_NODE))?;
+    let mut file = File::open(format!("./data/RainbowTable_{}_{}_{}_{}.json", SIZE,i, *NB_PASSWORD, *NB_NODE))?;
 
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
@@ -41,8 +41,7 @@ pub fn deserialize() -> Result<Vec<Node>> {
     Ok(nodes)
 }
 
-
-// Cette fonction renvoie true si un fichier portant le nom filename se trouve dans le dossier directory et false sinon.
+// Renvoie True si un fichier portant le nom filename se trouve dans le dossier directory, et False sinon.
 pub fn file_exists_in_directory(directory: &str, filename: &str) -> bool {
     if let Ok(files) = read_dir(directory) {
         for file in files {
@@ -58,14 +57,14 @@ pub fn file_exists_in_directory(directory: &str, filename: &str) -> bool {
     false
 }
 
-// Cette fonction supprime le fichier filename dans le dossier directory.
+// Supprime le fichier filename dans le dossier directory.
 pub fn delete_file_in_directory(directory: &str, filename: &str) -> std::io::Result<()> {
     let path = std::path::Path::new(directory).join(filename);
     remove_file(path)?;
     Ok(())
 }
 
-// Supprime tout les fichiers contenu dans le dossier directory
+// Supprime tout les fichiers contenu dans le dossier directory.
 pub fn delete_all_file_in_directory(directory: &str) {
     if let Ok(entries) = fs::read_dir(directory) {
         for entry in entries {

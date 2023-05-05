@@ -2,13 +2,14 @@ use console::{style, Emoji};
 use colored::*;
 use structopt::StructOpt;
 use std::time::{Instant};
+use std::io;
 
 use rainbow_table_attack::{
     sha3::sha3,
     attack,
     performance::*,
     rainbow_table::{ Node,pool },
-    constants::*,
+    constants::{*, self},
     file::*,
 };
 
@@ -60,23 +61,73 @@ fn main() {
     match args.cmd {
         Command::Attack { } => {
             println!("{} {} Generate Rainbow Table...", style("[1/3]").bold().dim(), LOOKING_GLASS);
-            if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}.json", SIZE, *NB_PASSWORD, *NB_NODE)) {
+            if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}_{}.json", SIZE,0, *NB_PASSWORD, *NB_NODE)) {
                 println!("Existing file found !");
             }
             else {
-                create_table();
+                create_table(0);
             }
             println!("{} {} Save File...", style("[2/3]").bold().dim(), SAVE);
-            let mut rainbow_table: Vec<Node> = deserialize().unwrap();
+            let mut rainbow_table: Vec<Node> = deserialize(0).unwrap();
 
             println!("{} {} Attack...", style("[3/3]").bold().dim(), ATTACK);
             let result = attack::execution(&mut rainbow_table, sha3(FLAG)); 
+
+            let mut trouvé = false;
 
             match result {
                 None => println!("{}", "Failed Attack!".red()),
                 Some(password) => {
                     println!("{}", "Successful Attack!".green());
                     println!("> The password is : {}", password);
+                    trouvé = true;
+                }
+            }
+            
+            if trouvé == false {
+                println!("{}", "Would you like to try the attack on another table ? y/n".red());
+                let mut entre = String::new();
+                io::stdin().read_line(&mut entre).expect("An erroroccured with the input");
+                if (entre.trim() == "y") || (entre.trim() == "Y") {
+                    if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}_{}.json", SIZE,1, *NB_PASSWORD, *NB_NODE)) {
+                        println!("Existing file found !");
+                    } else {
+                        create_table(1);
+                    }
+                    let mut rainbow_table: Vec<Node> = deserialize(1).unwrap();
+                    println!("{} {} Attack...", style("[3/3]").bold().dim(), ATTACK);
+                    let result2 = attack::execution(&mut rainbow_table, sha3(FLAG));
+                    match result2 {
+                                None => println!("{}", "Failed Attack!".red()),
+                                Some(password) => {
+                                    println!("{}", "Successful Attack!".green());
+                                    println!("> The password is : {}", password);
+                                    trouvé = true
+                                }
+                            }  
+                }
+            }
+
+            if trouvé == false {
+                println!("{}", "Would you like to try the attack on another table ? y/n".red());
+                let mut entre = String::new();
+                io::stdin().read_line(&mut entre).expect("An erroroccured with the input");
+                if (entre.trim() == "y") || (entre.trim() == "Y") {
+                    if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}_{}.json", SIZE,2, *NB_PASSWORD, *NB_NODE)) {
+                        println!("Existing file found !");
+                    } else {
+                        create_table(2);
+                    }
+                    let mut rainbow_table: Vec<Node> = deserialize(2).unwrap();
+                    println!("{} {} Attack...", style("[3/3]").bold().dim(), ATTACK);
+                    let result2 = attack::execution(&mut rainbow_table, sha3(FLAG));
+                    match result2 {
+                                None => println!("{}", "Failed Attack!".red()),
+                                Some(password) => {
+                                    println!("{}", "Successful Attack!".green());
+                                    println!("> The password is : {}", password);
+                                }
+                            }  
                 }
             }
         }
@@ -85,10 +136,10 @@ fn main() {
             let performance: Option<Performance>;
 
             println!("{} {} Generate Rainbow Table...", style("[1/3]").bold().dim(), LOOKING_GLASS);
-            create_table();
+            create_table(0);
 
             println!("{} {} Save File...", style("[2/3]").bold().dim(), SAVE);
-            let mut rainbow_table: Vec<Node> = deserialize().unwrap();
+            let mut rainbow_table: Vec<Node> = deserialize(0).unwrap();
 
             println!("{} {} Performance Testing...", style("[3/3]").bold().dim(), PERFORMANCE);
 
@@ -96,9 +147,6 @@ fn main() {
                 None => performance = None,
                 Some(value) => {
                     match value.as_str() {
-                        "reduction" => {
-                            performance = Some(perf_reduction());
-                        },
                         "attack" => {
                             performance = Some(perf_attack(&mut rainbow_table, 10));
                         }
@@ -123,21 +171,37 @@ fn main() {
             println!("> RainbowTable Password Total: {}", (*NB_PASSWORD) * (*NB_NODE));
             let start = Instant::now();
             let res = pool();
-            serialize(&res).unwrap();
+            serialize(&res,0).unwrap();
             let end = Instant::now();
             let duration = end - start;
             println!("      time: {} seconds.", duration.as_secs_f32().to_string().purple());
-            /*  Bordel ici 
-            let start = Instant::now();
-            create_table();
-            let end = Instant::now();
-            let duration = end - start;
-            println!("      time: {:?}", duration)*/
         },
         Command::Table { } => {
-            println!("{} {} Generate table...", style("[1/1]").bold().dim(), DELETE);
-
-            create_table(); 
+            println!("{} {} Generate table of size {:?} NB_PASSWORDS and {} NB_NODES...", style("[1/1]").bold().dim(), DELETE,*NB_PASSWORD,*NB_NODE);
+            let mut compteur = 0;
+            for n in 0..3 {
+                if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}_{}.json", SIZE,n, *NB_PASSWORD, *NB_NODE)) {
+                    compteur = compteur + 1;
+                }
+                //println!("{}",n);
+            }
+            println!("{}",compteur);
+            if compteur == 0 {
+                create_table(0);
+            } else if compteur < 3 {
+                create_table(compteur);
+            } else {
+                println!("Already 3 versions of this rainbow table exist, wich one would you like to replace ? 0/1/2");
+                let mut entre = String::new();
+                io::stdin().read_line(&mut entre).expect("An erroroccured with the input");
+                let entre_int: u8 = entre.trim().parse().expect("Input was not an integer");
+                if entre_int > 2 {
+                    println!("L'entrée doit être comprise entre 0 et 2");
+                } else {
+                    delete_file_in_directory("./data", &format!("RainbowTable_{}_{}_{}_{}.json", SIZE,entre_int, *NB_PASSWORD, *NB_NODE));
+                    create_table(entre_int);
+                }
+            } 
         }
         Command::Delete { all } => {
             println!("{} {} Deleting...", style("[1/1]").bold().dim(), DELETE);
@@ -156,12 +220,12 @@ fn main() {
     }
 }
 
-fn create_table() {
-    if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}.json", SIZE, *NB_PASSWORD, *NB_NODE)) {
+fn create_table(i:u8) {
+    if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}_{}.json", SIZE,i, *NB_PASSWORD, *NB_NODE)) {
         println!("RainbowTable already exist !");
     }
     else {
         let rainbow_table: Vec<Node> = pool();
-        serialize(&rainbow_table).unwrap();
+        serialize(&rainbow_table,i).unwrap();
     }
 }

@@ -12,7 +12,7 @@ use crate::{
     constants::*
 };
 
-// Création d'une structure noeud contenant le début de la chaine et la fin de la chaine.
+// Création d'une structure noeud contenant le début de la chaîne et la fin de la chaîne.
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Node {
     pub start: String,
@@ -23,24 +23,23 @@ pub struct Node {
 pub fn pool() -> Vec<Node> {
     // On récupère le nombre de threads disponibles sur l'ordinateur.
     let num_threads = num_cpus::get();
-    println!("Tu peux créer {} threads.", num_threads);
 
     // Création d'une barre du chargement.
     let bar = ProgressBar::new(50);
     bar.set_style(ProgressStyle::with_template("{spinner:.magenta} [{elapsed_precise}] {wide_bar:.magenta} ({eta})")
         .unwrap()
         .with_key("eta", |state: &ProgressState, w: &mut dyn Write| write!(w, "{:.1}s", state.eta().as_secs_f64()).unwrap()));
+    bar.set_position(0);
     
     // Création d'une Pool de threads via la bibliothèque rayon.
     let pool = rayon::ThreadPoolBuilder::new().num_threads(num_threads).build().unwrap();
     let slice = *NB_PASSWORD / num_threads as u32;
-    
-    // Variable qui a une mémoire partagé avec les threads.
+    // Variable qui a une mémoire partagée avec les threads.
     let starting_items_shared = Arc::new(Mutex::new(Vec::<String>::new()));
     let bar_shared : Arc<Mutex<ProgressBar>> = Arc::new(Mutex::new(bar.clone()));
     
-    /* Initialisation des threads pour qu'ils exécutent la fonction generate_table sur une portion des mots de passe stockables dans la rainbow_table.
-       Et que les portions de mots de passe générées par les threads seront assemblées dans une table unique.
+    /* Initialisation des threads pour qu'ils exécutent la fonction generate_table sur une portion des mots de passe stockables dans la rainbow_table
+       et que les portions de mots de passe générées par les threads seront assemblées dans une table unique.
     */
     let table: Vec<Node> = pool.install(|| {
         (0..num_threads).into_par_iter()
@@ -86,16 +85,16 @@ fn generate_table(
                 while contains(reduce.to_string(),&mut starting_items) {
                     reduce = generate(SIZE as usize,&charset);
                 }
-                // On défini le premier élément de la chaine avec le mot de passe obtenu à l'étape précédente.
+                // On définit le premier élément de la chaine avec le mot de passe obtenu à l'étape précédente.
                 node.start = reduce.to_string();
                 starting_items.push(reduce.to_string());
                 
-                //Libère la variable.
+                // Libère la variable.
                 drop(starting_items);
 
             } 
             // Si on est dans la dernière étape d'une chaine, on effectue un hashage puis un reduce sur le mot de passe que l'on
-            // a actuellemnt, puis on défini la fin de chaine avec le mot de passe obtenu.
+            // a actuellemnt, puis on définit la fin de chaine avec le mot de passe obtenu.
             else if j+1 == *NB_NODE {
                 hash = sha3(&reduce);
                 reduce = reduction(hash,j+NONCE);
@@ -115,7 +114,7 @@ fn generate_table(
                 drop(barr);
             }
         }
-        // Une fois la chaine fini (premier et dernier élément de la chaine définie), on ajoute la node au vecteur contenant la
+        // Une fois la chaine finie (premier et dernier élément de la chaine définie), on ajoute le noeud au vecteur contenant la
         // rainbow table.
         rainbow_table.push(node.clone());
     }
@@ -123,7 +122,7 @@ fn generate_table(
 
 }
 
-// Cette fonction prend en argument un String et un vecteur de String et renvoie true si l'élément est dans le vecteur et false sinon.
+// Cette fonction prend en argument un String et un vecteur de String et renvoie True si l'élément est dans le vecteur, et False sinon.
 fn contains(elt:String, tab: &mut Vec::<String>) -> bool {
     for mdp in tab {
         if mdp == &elt {
