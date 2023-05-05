@@ -29,4 +29,3 @@ fn to_password(bytes: &[u8; 32]) -> String {
     }
     password
 }
-

@@ -42,7 +42,7 @@ pub fn perf_reduction() -> Performance {
 
     let start = Instant::now();
 
-    for i in 0..NB_NODE*NB_PASSWORD {
+    for i in 0..(*NB_NODE)*(*NB_PASSWORD) {
         
         reduce = reduction(hash.as_slice().try_into().unwrap(), i+NONCE);
         if !contains(&reduce, &password_reduce) {
@@ -89,6 +89,11 @@ pub fn perf_attack(rainbow_table: &mut Vec<Node>, nb_test: u32) -> Performance {
     return Performance { type_perf: Type::Attack, percent: Some(success as f32 / ((success + fail) as f32)*100.0), collision: None, time: duration };
 }
 
+/* Cette fonction prend en argument une rainbow table en argument. On part des premiers noeuds de chaque ligne de la rainbow table et on recréé les lignes à partir
+de ces derniers. A chaque fois que l'on tombe sur une chaine de caractère que l'on a pas encore croisé, on l'ajoute à un vecteur.
+Une fois le processus terminé, on divise SIGMA _SIZE(le nombre de carcatère que l'on décide de prendre en comtpe)^SIZE(la taille des chaines de caractères)
+par la taille du vecteur. On multiplie le résultat par 100 ce qui nous le pourcentage de mots de passes que l'on a testé.
+ */
 pub fn perf_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
 
     let mut all_passw = Vec::<String>::new();
@@ -102,7 +107,7 @@ pub fn perf_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
             all_passw.push(String::from(red.clone()));
         }
 
-        for i in 1..NB_NODE {
+        for i in 1..*NB_NODE {
             let hash = sha3(&red.clone());
 
             red = reduction(hash, i+NONCE);
@@ -119,11 +124,11 @@ pub fn perf_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
     return Performance { type_perf: Type::RainbowTable, percent: Some(all_passw.len() as f32 / NB_PASSWORD_TOTAL as f32 *100.0) ,collision: None, time: duration };
 }
 
-
+// Les 2 fonctions ci dessous font la même chose que la fonction au dessus en parralellisant la tâche ce qui la rend plus rapide.
 pub fn perf_para_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
     let start = Instant::now();
 
-    let bar = ProgressBar::new(NB_PASSWORD as u64);
+    let bar = ProgressBar::new(*NB_PASSWORD as u64);
 
     bar.set_style(ProgressStyle::with_template("{spinner:.green} [{elapsed_precise}] {wide_bar} ({eta})")
         .unwrap()
@@ -131,13 +136,13 @@ pub fn perf_para_rainbow_table(rainbow_table: &Vec<Node>) -> Performance {
     
     let num_threads = num_cpus::get();
     let pool = rayon::ThreadPoolBuilder::new().num_threads(num_threads).build().unwrap();
-    let slice = NB_PASSWORD / num_threads as u32;
+    let slice = *NB_PASSWORD / num_threads as u32;
     
     let all_passw : Vec<String> = pool.install(|| {
         (0..num_threads).into_par_iter()
             .map(|i| {
                 let start = i as u32 * slice;
-                let end = if i == num_threads - 1 { NB_PASSWORD } else { start + slice };
+                let end = if i == num_threads - 1 { *NB_PASSWORD } else { start + slice };
                 para_rainbow_test(start, end, rainbow_table, &bar)
             }).flatten().collect()
     });
@@ -158,7 +163,7 @@ fn para_rainbow_test(startpassword : u32, endpassword: u32, rainbow_table: &Vec<
             all_passw.push(red.clone());
         }
 
-        for j in 1..NB_NODE {
+        for j in 1..*NB_NODE {
             let hash = sha3(&red);
 
             red = reduction(hash, j+NONCE);
@@ -192,6 +197,7 @@ fn increment_string(s: &str) -> String {
     chars.into_iter().collect()
 }
 
+// Cette fonction renvoie true si truc est dans le vecteur vector et false sinon
 fn contains(truc:&str, vector:&Vec<String>) -> bool {
     for elt in vector {
         if truc == elt {

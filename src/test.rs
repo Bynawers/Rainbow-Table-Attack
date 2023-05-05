@@ -44,7 +44,7 @@ mod tests {
     // recherché et on regarde si on trouve bien le mot de passe.
     #[test]
     fn test_attack() {
-        let file = File::open(format!("./data/RainbowTable_Test.json"));
+        let file = File::open(format!("./data/test/RainbowTable_Test.json"));
 
         let mut contents = String::new();
         file.unwrap().read_to_string(&mut contents);

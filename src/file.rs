@@ -18,7 +18,7 @@ where
 
     let json_string = to_string(data)?;
 
-    let mut file = File::create(&format!("./data/RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE))?;
+    let mut file = File::create(&format!("./data/RainbowTable_{}_{}_{}.json", SIZE, *NB_PASSWORD, *NB_NODE))?;
 
     file.write_all(json_string.as_bytes())?;
 
@@ -31,7 +31,7 @@ where
 // son contenu puis le transforme en vecteur de node qui sera une rainbow table.
 pub fn deserialize() -> Result<Vec<Node>> {
 
-    let mut file = File::open(format!("./data/RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE))?;
+    let mut file = File::open(format!("./data/RainbowTable_{}_{}_{}.json", SIZE, *NB_PASSWORD, *NB_NODE))?;
 
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
