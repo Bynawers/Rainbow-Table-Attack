@@ -1,100 +1,30 @@
 use crate::constants;
 
-pub fn reduction(hash: [u8; 32], nonce: u32) -> String {
-    return reduce_xor(hash, nonce);
+// Renvoie le résultat de la fonction reduce_xor.
+pub fn reduction(hash: [u8; 32], nonce: u32, size_char: u8) -> String {
+    return reduce_xor(hash, nonce, size_char);
 }
 
-fn _reduce_xor_2(hash: [u8; 32], nonce: u32) -> String {
-    let mut x = hash.clone();
-    let size = constants::SIZE as usize;
-    for i in 0..size {
-        x[i] = x[i + 4 ] ^ nonce as u8;
-        x[i] = x[i] ^ x[31-i];
-    }
-    let password = to_password(&x);
-    password
-}
-
-fn _reduce_xor_mod(hash: [u8; 32], nonce: u32) -> String {
-    let mut reduce: [u8; 32] = [0; 32];
-
-    for index in 0..32 {
-        reduce[index] = hash[index] ^ nonce as u8;
-        if nonce == 0 {
-            reduce[index] = hash[index] % 1 as u8;
-        }
-        reduce[index] = hash[index] ^ nonce as u8;
-    }
-
-    let password = to_password(&reduce);
-    password
-}
-
-fn reduce_xor(hash: [u8; 32], nonce: u32) -> String {
+// Effectue un xor entre une nonce et un hashé sur les n premiers octets (n étant le nombre de caractères que l'on décide de prendre en compte).
+fn reduce_xor(hash: [u8; 32], nonce: u32, size_char: u8) -> String {
     let mut reduce: [u8; 32] = [0; 32];
 
     for index in 0..32 {
         reduce[index] = hash[index] ^ nonce as u8;
     }
 
-    let password = to_password(&reduce);
+    let password = to_password(&reduce, size_char);
     password
 }
 
-fn _reduce_mod(hash: [u8; 32], nonce: u32) -> String {
-    let mut reduce: [u8; 32] = [0; 32];
-
-    for i in 0..8 {
-        let hash_slice = &hash[(i * 4)..((i+1) * 4)];
-        let hash_value = u32::from_le_bytes([hash_slice[0], hash_slice[1], hash_slice[2], hash_slice[3]]);
-
-        let hash_reduce = hash_value % nonce;
-        let output = hash_reduce.to_le_bytes();
-
-        reduce[(i * 4)..((i+1) * 4)].copy_from_slice(&output);
-    }
-
-    let password = to_password(&reduce);
-    password
-}
-
-fn _reduce_truncate(hash: [u8; 32], nonce: u32) -> String {
-    let mut reduce: [u8; 32] = [0; 32];
-
-    let start_value: usize = nonce as usize % 32;
-
-    for index in start_value..32 {
-        reduce[index] = hash[index];
-    }
-    for index in 0..start_value {
-        reduce[index] = hash[index];
-    }
-
-    let password = to_password(&reduce);
-    password
-}
-
-fn _reduce_truncate_xor(hash: [u8; 32], nonce: u32) -> String {
-    let mut reduce: [u8; 32] = [0; 32];
-
-    let start_value: usize = nonce as usize % 32;
-
-    for index in start_value..32 {
-        reduce[index] = hash[index] ^ nonce as u8;
-    }
-    for index in 0..start_value {
-        reduce[index] = hash[index] ^ nonce as u8;
-    }
-
-    let password = to_password(&reduce);
-    password
-}
-
-fn to_password(bytes: &[u8; 32]) -> String {
+// Extrait les n (n étant toujours le nombre de caractères) premiers octets d'un tableau de 32 octets et renvoie les
+// éléments correspondants dans le tableau SIGMA qui contient les caractères que l'on a décidé de prendre en compte.
+fn to_password(bytes: &[u8; 32], size: u8) -> String {
     let mut password: String = String::from("");
 
-    for i in 0..constants::SIZE {
+    for i in 0..size {
         password.push(constants::SIGMA[((bytes[i as usize]) % constants::SIGMA_SIZE) as usize]);
     }
     password
 }
+

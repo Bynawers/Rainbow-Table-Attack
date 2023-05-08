@@ -18,3 +18,10 @@ num_cpus = "1.15.0"
 threadpool = "1.8.1"
 rayon = "1.7.0"
 ansi_term = "0.12.1"
+tokio = { version = "1", features = ["full"] }
+async-std = "1.12.0"
+
+iced = "0.9.0"
+iced_native = "0.10.3"
+iced_lazy = "0.6.1"
+hex = "0.4.3"

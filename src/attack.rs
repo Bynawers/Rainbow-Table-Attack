@@ -8,39 +8,39 @@ use num_cpus;
 
 use colored::*;
 
+
 /* Dans la boucle ci dessous, on va calculer reduce(hash) NB_NODES fois
 *     exemple :    -première itération :   reduce = reduce(hash_flag)
 *                    -deuxième itération :   reduce = reduce(hash(reduce(hash_flag)))
 *                    etc... jusqu'a NB_NODES itération
 *    Puis, à chaque itération, on compare le reduce avec toutes les fin de chaines de la rainbow table
 *    Si on trouve une fin de chaine = reduce, cela veut dire que le hashé recherché est peut-être dans la chaine
-*    On recalcule ensuite la chaine en repartant du première élément de la chaine, puis si on retombe sur le hashé recherché,
+*    On recalcule ensuite la chaine en repartant du premier élément de la chaine, puis si on retombe sur le hashé recherché,
 *    on a retrouvé le mot de passe recheché et on renvoie le reduce précédent le hashé que l'on a retrouvé dans la chaine
 */
-pub fn execution(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32]) -> Option<String> {
-
+pub fn execution(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], nb_node: u32, nb_password: u32, size: u8) -> Option<String> {
     let mut position_flag;
 
     let mut reduce: String = String::from("");
     let mut tmp: [u8; 32];
 
-    for i in 0..NB_NODE {
+    for i in 0..nb_node {
 
         if DEBUG { println!("{}","\n> Attack Node.. ".yellow()); }
 
-        for j in NB_NODE-(i+1)..NB_NODE {
+        for j in nb_node-(i+1)..nb_node {
 
-            if j == NB_NODE-(i+1) {
+            if j == nb_node-(i+1) {
                 tmp = hash_flag;
             }
             else {
                 tmp = sha3(&reduce.clone());
             }
         
-            reduce = reduction(tmp, j+NONCE);
+            reduce = reduction(tmp, j+NONCE, size);
             
             if DEBUG {
-                if j+1 == NB_NODE {
+                if j+1 == nb_node {
                     print!("{} R({})", reduce, j);
                 }
                 else {
@@ -51,15 +51,15 @@ pub fn execution(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32]) -> Option<S
 
         if DEBUG { println!("search {}", reduce); }
 
-        //ici on appelle la fonction compare_end qui renvoie la position de la chaine où le dernier élément = reduce
+        // ici on appelle la fonction compare_end qui renvoie la position de la chaine où le dernier élément = reduce
         // si aucune chaine ne correspond au reduce que l'on a, la fonction renvoie NB_PASSWORD (qui correspond a l'indice max + 1)
-        position_flag = pool_search(rainbow_table, reduce.clone());
+        position_flag = pool_search(rainbow_table, reduce.clone(), nb_node, nb_password);
   
         if position_flag.len() != 0 {
             // on appelle ici la fonction reverse, qui recréé la chaine en repartant du premier élément de la chaine
             // cette foncion renvoie true si le hashé que l'on recherche est dans la chaine et false sinon
             for elt in position_flag {
-                match reverse(rainbow_table, hash_flag, elt) {
+                match reverse(rainbow_table, hash_flag, elt, nb_node, size) {
                     None => continue,
                     Some(value) => return Some(value),
                 }
@@ -72,18 +72,18 @@ pub fn execution(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32]) -> Option<S
     return None;
 }
 
-fn pool_search(rainbow_table: &mut Vec<Node>, value: String) -> Vec<u32> {
+fn pool_search(rainbow_table: &mut Vec<Node>, value: String, _nb_node: u32, nb_password: u32) -> Vec<u32> {
     let num_threads = num_cpus::get();
     
     // Création d'une Pool de threads via la bibliothèque rayon
     let pool = rayon::ThreadPoolBuilder::new().num_threads(num_threads).build().unwrap();
-    let slice = NB_PASSWORD / num_threads as u32;
+    let slice = nb_password / num_threads as u32;
 
     let allpositions: Vec<u32> = pool.install(|| {
         (0..num_threads).into_par_iter()
             .map(|i| {
                 let start = i as u32 * slice;
-                let end = if i == num_threads - 1 { NB_PASSWORD } else { start + slice };
+                let end = if i == num_threads - 1 { nb_password } else { start + slice };
                 compare_end(rainbow_table.clone(), value.clone(), start, end)
             }).flatten().collect()
     });
@@ -95,8 +95,8 @@ fn pool_search(rainbow_table: &mut Vec<Node>, value: String) -> Vec<u32> {
 /*
 *   Compare la value d'entrée à toute les valeurs "end" de la rainbowtable passé en entrée
 */
-fn compare_end(rainbow_table: Vec<Node>, value: String, start: u32, end: u32,
-) -> Vec<u32> {
+fn compare_end(rainbow_table: Vec<Node>, value: String, start: u32, end: u32) -> Vec<u32> {
+
     let mut allpositions : Vec<u32> = Vec::<u32>::new();
     for i in start..end {
         if rainbow_table[i as usize].end == value {
@@ -110,7 +110,9 @@ fn compare_end(rainbow_table: Vec<Node>, value: String, start: u32, end: u32,
     allpositions
 }
 
-fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u32) -> Option<String> {
+//Recréé la chaine à l'indice position_flag a partir du premier élément de la chaine et renvoie true si 
+// hash flag est dans la chaine.
+fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u32, nb_node: u32, size: u8) -> Option<String> {
     
     if DEBUG {
         println!("{}", "> Recrate node..".yellow());
@@ -120,7 +122,7 @@ fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u3
     let mut tmp: [u8; 32];
     let mut reduce: String = String::from("");
 
-    for i in 0..NB_NODE+1 {
+    for i in 0..nb_node+1 {
 
         if i == 0 {
             tmp = sha3(&rainbow_table[(position_flag)as usize].start);
@@ -131,13 +133,20 @@ fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u3
 
         if DEBUG { print!("{} => ", reduce); }
 
+
+        if reduce == "a" {
+            println!("tmp : {:?}", tmp);
+            println!("hash_flag : {:?}", hash_flag);
+        }
         if tmp == hash_flag {
             return Some(reduce);
         }
 
-        reduce = reduction(tmp, i+NONCE+1);
+        reduce = reduction(tmp, i+NONCE+1, size);
     }
     if DEBUG { println!("{}", "FLAG not found".red()); }
 
     return None;
 }
+
+
