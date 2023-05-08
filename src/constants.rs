@@ -1,16 +1,20 @@
+use lazy_static::lazy_static as set_constant;
+
 // Attack
 pub const GENERATOR_RAINBOW_TABLE: &str = "Crypto";
-pub const FLAG: &str = "a5x";
+pub const FLAG: &str = "p";
 pub const TEST: bool = true;
 
 // Create RainbowTable
 pub const NONCE: u32 = 248820715;
 
-pub const NB_PASSWORD: u32 = 1;
-pub const NB_NODE: u32 = 1;
+set_constant! {
+    pub static ref NB_PASSWORD : u32 = ((((SIZE as u64 + 1) * ((SIGMA_SIZE as u64).pow(SIZE as u32)))*50)as f32).sqrt() as u32;
+    pub static ref NB_NODE: u32 = *NB_PASSWORD / 50;
+}
 
 // Mot de Passe
-pub const SIZE: u8 = 3;
+pub const SIZE: u8 = 1;
 
 /*
 pub const SIGMA_SIZE: u8 = 26;

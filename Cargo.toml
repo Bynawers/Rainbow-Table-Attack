@@ -25,3 +25,5 @@ iced = "0.9.0"
 iced_native = "0.10.3"
 iced_lazy = "0.6.1"
 hex = "0.4.3"
+
+lazy_static = "1.4.0"

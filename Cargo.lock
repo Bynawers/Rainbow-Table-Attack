@@ -2225,6 +2225,7 @@ dependencies = [
  "iced_lazy",
  "iced_native",
  "indicatif",
+ "lazy_static",
  "num_cpus",
  "random-string",
  "rayon",
