@@ -1,4 +1,3 @@
-/*
 #[cfg(test)]
 mod tests {
     use crate::sha3::sha3;
@@ -53,9 +52,17 @@ mod tests {
         let nodes: Vec<Node> = from_str(&contents).unwrap();
         let rainbow_table: Result<Vec<Node>> = Ok(nodes);
         
-        let res = execution_test(&mut rainbow_table.unwrap(), "ab", SIZE);
-        assert_eq!(res, true)
-    }   
+        let hash_ab = sha3("ab");
+
+        let res = test::execution_test(&mut rainbow_table.unwrap(), hash_ab);
+        let res_string = match res {
+            Some(t) => t,
+            _ => String::from("-")
+        };
+        assert_eq!("ab",res_string)
+    }
+    
+
 }
 
 /* Les fonctions ci dessous sont identiques à celles dans le fichier attack.rs à peu de choses près
@@ -63,13 +70,14 @@ les fonctions ci dessous ne font pas appel aux constantes SIZE,NB_PASSWORD ou NB
 des tests unitaires.
  */
 
-/* Les fonctions ci dessous sont identiques à celles dans le fichier attack.rs à peu de choses près
-les fonctions ci dessous ne font pas appel aux constantes SIZE,NB_PASSWORD ou NBNODES et sont appelées uniquement dans le cadre
-des tests unitaires.
- */
+use crate::rainbow_table::Node;
+use crate::constants::*;
+use colored::*;
+use crate::sha3::sha3;
+use num_cpus;
+use rayon::prelude::*;
 
-
-pub fn execution_test(rainbow_table: &mut Vec<Node>, flag: &str, size: u8) -> bool {
+pub fn execution_test(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32]) -> Option<String> {
 
     let mut position_flag;
 
@@ -99,18 +107,22 @@ pub fn execution_test(rainbow_table: &mut Vec<Node>, flag: &str, size: u8) -> bo
                     print!("{} R({}) => ", reduce, j);
                 }
             }
-
-            reduce = reduction(tmp, j+NONCE, size);
-            
         }
 
         if DEBUG { println!("search {}", reduce); }
 
-        position_flag = compare_end_test(rainbow_table, reduce.clone());
-        if position_flag != 101 {
-            if reverse_test(rainbow_table, hash_flag, position_flag, size) {
-            println!("{} == {} ce truc est {}",reduce,rainbow_table[position_flag as usize].end,reduce==rainbow_table[position_flag as usize].end); 
-                return true;
+        //ici on appelle la fonction compare_end qui renvoie la position de la chaine où le dernier élément = reduce
+        // si aucune chaine ne correspond au reduce que l'on a, la fonction renvoie 101 (qui correspond a l'indice max + 1)
+        position_flag = pool_search(rainbow_table, reduce.clone());
+  
+        if position_flag.len() != 0 {
+            // on appelle ici la fonction reverse, qui recréé la chaine en repartant du premier élément de la chaine
+            // cette foncion renvoie true si le hashé que l'on recherche est dans la chaine et false sinon
+            for elt in position_flag {
+                match reverse(rainbow_table, hash_flag, elt) {
+                    None => continue,
+                    Some(value) => return Some(value),
+                }
             }
         } 
         else {
@@ -158,7 +170,9 @@ fn compare_end(rainbow_table: Vec<Node>, value: String, start: u32, end: u32,
     allpositions
 }
 
-fn reverse_test(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u32, size: u8) -> bool {
+//Recréé la chaine à l'indice position_flag a partir du premier élément de la chaine et renvoie true si 
+// hash flag est dans la chaine.
+fn reverse(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_flag: u32) -> Option<String> {
     
     if DEBUG {
         println!("{}", "> Recrate node..".yellow());
@@ -168,9 +182,7 @@ fn reverse_test(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_fla
     let mut tmp: [u8; 32];
     let mut reduce: String = String::from("");
 
-    let trouve = false;
-
-    for i in 0..50 {
+    for i in 0..50+1 {
 
         if i == 0 {
             tmp = sha3(&rainbow_table[(position_flag)as usize].start);
@@ -185,7 +197,7 @@ fn reverse_test(rainbow_table: &mut Vec<Node>, hash_flag: [u8; 32], position_fla
             return Some(reduce);
         }
 
-        reduce = reduction(tmp, i+1+NONCE, size);
+        reduce = reduction_test(tmp, i+NONCE+1);
     }
     if DEBUG { println!("{}", "FLAG not found".red()); }
 
@@ -203,7 +215,7 @@ fn reduction_test(hash: [u8; 32], nonce: u32) -> String {
     password
 }
 
-// Cette fonction est identique à celle au dessus, mais elle etrait toujours 2 octets.
+// Cette fonction est identique à celle au dessus, mais elle extrait toujours 2 octets.
 fn to_password_test(bytes: &[u8; 32]) -> String {
     let mut password: String = String::from("");
 
@@ -211,4 +223,4 @@ fn to_password_test(bytes: &[u8; 32]) -> String {
         password.push(SIGMA[((bytes[i as usize]) % SIGMA_SIZE) as usize]);
     }
     password
-}*/
+}

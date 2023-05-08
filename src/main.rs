@@ -52,12 +52,22 @@ enum Command {
     #[structopt(name = "start")]
     Start {
     },
+    #[structopt(name = "sha3")]
+    Sha3 {
+        password: String,
+    },
 }
 
 fn main() {
     let args = Cli::from_args();
 
     match args.cmd {
+        Command::Sha3 { password } => {
+            let hashe = sha3(&password);
+            for elt in hashe {
+                print!("{:02x}",elt);
+            }
+        }
         Command::Attack { } => {
             println!("{} {} Generate Rainbow Table...", style("[1/3]").bold().dim(), LOOKING_GLASS);
             if file_exists_in_directory("./data", &format!("RainbowTable_{}_{}_{}.json", SIZE, NB_PASSWORD, NB_NODE)) {
