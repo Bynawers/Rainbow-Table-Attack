@@ -1,6 +1,7 @@
 use iced::{ Color, Length, Sandbox, Alignment, Renderer, Settings, Element, window::Settings as WindowSettings};
 use iced::widget::{ column, container, button, row, text, text_input };
 use iced::theme::{self, Theme};
+use regex;
 
 use crate::attack::*;
 use crate::file::*;
@@ -24,7 +25,7 @@ pub struct RainbowTableAttack {
     steps: State,
     hash: String,
     size: u8,
-    result: String,
+    result: String
 }
 
 #[derive(Debug, Clone)]
@@ -54,7 +55,7 @@ impl Sandbox for RainbowTableAttack {
     fn update(&mut self, message: Message) {
         match message {
             Message::IncrementSize => {
-                if self.size < 7 {
+                if self.size < 5 {
                     self.size += 1;
                 }
             }
@@ -76,9 +77,13 @@ impl Sandbox for RainbowTableAttack {
                     [ "RainbowTable_2_1_477_9.json", "RainbowTable_2_2_477_9.json", "RainbowTable_2_3_477_9.json" ], 
                     [ "RainbowTable_3_1_3444_68.json", "RainbowTable_3_2_3444_68.json", "RainbowTable_3_3_3444_68.json" ], 
                     [ "RainbowTable_4_1_24049_480.json", "RainbowTable_4_2_24049_480.json", "RainbowTable_4_3_24049_480.json" ], 
-                    [ "RainbowTable_5_1_x_x.json", "RainbowTable_5_2_x_x.json", "RainbowTable_5_3_x_x.json" ], 
-                    [ "RainbowTable_6_1_x_x.json", "RainbowTable_6_2_x_x.json", "RainbowTable_6_3_x_x.json" ], 
+                    [ "RainbowTable_5_1_164521_3290.json", "RainbowTable_5_2_164521_3290.json", "RainbowTable_5_3_164521_3290.json" ]
                 ];
+
+                if !is_valid_sha3_256(&self.hash) {
+                    self.steps = State::Error;
+                    return;
+                }
 
                 for file in file_path[(self.size-1) as usize] {
 
@@ -119,7 +124,6 @@ impl Sandbox for RainbowTableAttack {
             .on_input(Message::InputChanged)
             .padding(10)
             .size(20);
-        
 
         let input_password = column![
             text("Insérez le hash SHA-3 à casser").size(20),
@@ -176,6 +180,15 @@ impl Sandbox for RainbowTableAttack {
         .spacing(20)
         .align_items(Alignment::Center);
 
+        let text_error = column![
+            text("hash SHA-3 invalide").size(30),
+            button("Retour").on_press(Message::Back),
+        ]
+        .width(Length::Fill)
+        .height(200)
+        .spacing(30)
+        .align_items(Alignment::Center);
+
         let mut controls = column![];
 
         match &self.steps {
@@ -199,7 +212,8 @@ impl Sandbox for RainbowTableAttack {
                 .push(retry);
             }
             State::Error => {
-
+                controls = controls
+                .push(text_error)
             }
         }
 
@@ -256,4 +270,9 @@ impl State {
             *self = State::Fail;
         }
     }
+}
+
+fn is_valid_sha3_256(s: &str) -> bool {
+    let re = regex::Regex::new(r"^[0-9a-fA-F]{64}$").unwrap();
+    re.is_match(s)
 }

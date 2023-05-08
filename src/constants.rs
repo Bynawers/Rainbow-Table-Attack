@@ -14,7 +14,7 @@ set_constant! {
 }
 
 // Mot de Passe
-pub const SIZE: u8 = 1;
+pub const SIZE: u8 = 4;
 
 /*
 pub const SIGMA_SIZE: u8 = 26;
