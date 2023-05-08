@@ -134,12 +134,6 @@ fn main() {
             let end = Instant::now();
             let duration = end - start;
             println!("      time: {} seconds.", duration.as_secs_f32().to_string().purple());
-            /*  Bordel ici 
-            let start = Instant::now();
-            create_table(NB_NODE, NB_PASSWORD, SIZE);
-            let end = Instant::now();
-            let duration = end - start;
-            println!("      time: {:?}", duration)*/
         },
         Command::Table { } => {
             println!("{} {} Generate table of size {:?} NB_PASSWORDS and {} NB_NODES...", style("[1/1]").bold().dim(), DELETE,NB_PASSWORD,NB_NODE);
