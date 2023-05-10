@@ -24,6 +24,11 @@ cargo build
 
 # Commands
 
+Generate a hash from a word
+```
+cargo run sha3 <password>
+```
+
 Generate Rainbow Table with the chosen parameters (constants.rs)
 ```
 cargo run table
